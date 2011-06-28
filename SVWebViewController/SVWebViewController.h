@@ -10,12 +10,12 @@
 
 @interface SVWebViewController : UIViewController <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate> {
 	IBOutlet UIWebView *rWebView;
+	NSString *urlString;
 	
 	// iPhone UI
 	UINavigationItem *navItem;
-	IBOutlet UIBarButtonItem *backBarButton, *forwardBarButton, *refreshStopBarButton, *actionBarButton;
+	IBOutlet UIBarButtonItem *backBarButton, *forwardBarButton, *actionBarButton;
 	IBOutlet UIToolbar *toolbar;
-	CGFloat separatorWidth, buttonWidth;
 	
 	// iPad UI
 	UIButton *backButton, *forwardButton, *refreshStopButton, *actionButton;
@@ -25,8 +25,7 @@
 	BOOL deviceIsTablet, stoppedLoading;
 }
 
-@property (nonatomic, retain) NSString *urlString;
-
+@property (nonatomic, assign) NSString *address;
 - (id)initWithAddress:(NSString*)string;
 
 @end
