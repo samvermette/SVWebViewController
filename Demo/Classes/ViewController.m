@@ -13,25 +13,29 @@
 
 
 - (void)pushWebViewController {
-
-	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithAddress:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
+    NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
+	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL];
 	[self.navigationController pushViewController:webViewController animated:YES];
-	[webViewController release];
 }
 
 
 - (void)presentWebViewController {
-	
-	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithAddress:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
+	NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
+	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
+    webViewController.webDelegate = self;
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
 	[self presentModalViewController:webViewController animated:YES];	
-	[webViewController release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	return YES;
 }
 
+#pragma mark - SVModalWebViewControllerDelegate
+
+- (void)modalWebViewControllerIsDone:(SVModalWebViewController *)viewController {
+    [self dismissModalViewControllerAnimated:YES];
+}
 
 @end
 
