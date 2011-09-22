@@ -28,6 +28,6 @@
 @property (nonatomic, retain) UIWebView *webView;
 @property (nonatomic, retain) NSString *urlString;
 
-- (id)initWithAddress:(NSString*)string;
+- (SVWebViewController*)initWithAddress:(NSString*)string;
 
 @end
