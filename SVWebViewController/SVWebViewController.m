@@ -48,6 +48,7 @@
 	[super viewDidLoad];
 	
 	CGRect deviceBounds = [[UIApplication sharedApplication] keyWindow].bounds;
+    navItem = self.navigationItem;
 	
 	if(!deviceIsTablet) {
 
@@ -266,7 +267,7 @@
 
 - (void)setupToolbar {
 	
-    if(!navItem.leftBarButtonItem) {
+    if(!navItem.leftBarButtonItem && [self isModalInPopover] ) {
         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissController)];
         [navItem setLeftBarButtonItem:doneButton animated:YES];
         [doneButton release];
@@ -444,7 +445,14 @@
 
 
 - (void)dismissController {
-	[self dismissModalViewControllerAnimated:YES];
+    
+    if ( [self isModalInPopover] )
+    {    
+        [self dismissModalViewControllerAnimated:YES];
+    } else
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
 }
 
 #pragma mark -

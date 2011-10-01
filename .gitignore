@@ -1,6 +1,7 @@
 # Mac OS X
 *.DS_Store
 *.psd
+.svn
 
 # Xcode
 *.pbxuser
