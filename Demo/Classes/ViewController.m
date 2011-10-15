@@ -24,6 +24,8 @@
 	
 	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithAddress:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
+	// uncomment this line, if you want the old nav bar behavior in modal presentation
+	// webViewController.obtrusiveNavBar = YES;
 	[self presentModalViewController:webViewController animated:YES];	
 	[webViewController release];
 }

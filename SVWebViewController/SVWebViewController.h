@@ -8,7 +8,7 @@
 #import <MessageUI/MessageUI.h>
 
 
-@interface SVWebViewController : UIViewController <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate> {
+@interface SVWebViewController : UIViewController <UIWebViewDelegate, UIScrollViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate> {
 	UIWebView *rWebView;
     UINavigationBar *navBar;
     UIToolbar *toolbar;
@@ -23,10 +23,12 @@
 	CGFloat titleLeftOffset;
 	
 	BOOL deviceIsTablet, stoppedLoading;
+	BOOL _obtrusiveNavBar;
 }
 
 @property (nonatomic, retain) UIWebView *webView;
 @property (nonatomic, retain) NSString *urlString;
+@property (nonatomic, assign) BOOL obtrusiveNavBar;
 
 - (SVWebViewController*)initWithAddress:(NSString*)string;
 
