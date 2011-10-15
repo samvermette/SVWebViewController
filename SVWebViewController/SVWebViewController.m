@@ -13,6 +13,10 @@
 - (void)setupToolbar;
 - (void)setupTabletToolbar;
 - (void)stopLoading;
+- (float)navBarY;
+- (void)updateWebViewScrollViewContntInset;
+
+@property (nonatomic, readonly) UIScrollView *webViewScrollView;
 
 @end
 
@@ -236,14 +240,27 @@
 #pragma mark -
 #pragma mark Layout Methods
 
+-(float)navBarY {
+	return self.obtrusiveNavBar ? 0 : -(self.webViewScrollView.contentInset.top + self.webViewScrollView.contentOffset.y);
+}
+
+-(BOOL)obtrusiveNavBar {
+	return _obtrusiveNavBar || deviceIsTablet || self.navigationController;
+}
+
+-(void)setObtrusiveNavBar:(BOOL)value {
+	_obtrusiveNavBar = value;
+	[self layoutSubviews];
+}
+
 - (void)layoutSubviews {
 	CGRect deviceBounds = self.view.bounds;
 
     if(UIInterfaceOrientationIsLandscape(self.interfaceOrientation) && !deviceIsTablet && !self.navigationController) {
-        navBar.frame = CGRectMake(0, 0, CGRectGetWidth(deviceBounds), 32);
+        navBar.frame = CGRectMake(0, [self navBarY], CGRectGetWidth(deviceBounds), 32);
         toolbar.frame = CGRectMake(0, CGRectGetHeight(deviceBounds)-32, CGRectGetWidth(deviceBounds), 32);
     } else if(UIInterfaceOrientationIsPortrait(self.interfaceOrientation) && !deviceIsTablet && !self.navigationController) {
-        navBar.frame = CGRectMake(0, 0, CGRectGetWidth(deviceBounds), 44);
+        navBar.frame = CGRectMake(0, [self navBarY], CGRectGetWidth(deviceBounds), 44);
         toolbar.frame = CGRectMake(0, CGRectGetHeight(deviceBounds)-44, CGRectGetWidth(deviceBounds), 44);
     }
     
@@ -253,8 +270,11 @@
 		self.webView.frame = CGRectMake(0, CGRectGetMaxY(navBar.frame), CGRectGetWidth(deviceBounds), CGRectGetHeight(deviceBounds)-CGRectGetMaxY(navBar.frame));
 	else if(self.navigationController && !deviceIsTablet)
 		self.webView.frame = CGRectMake(0, 0, CGRectGetWidth(deviceBounds), CGRectGetMaxY(self.view.bounds));
-	else if(!deviceIsTablet)
-		self.webView.frame = CGRectMake(0, CGRectGetMaxY(navBar.frame), CGRectGetWidth(deviceBounds), CGRectGetMinY(toolbar.frame)-CGRectGetMaxY(navBar.frame));
+	else if(!deviceIsTablet) {
+		float top = self.obtrusiveNavBar ? CGRectGetMaxY(navBar.frame) : 0;
+		self.webView.frame = CGRectMake(0, top, CGRectGetWidth(deviceBounds), CGRectGetMinY(toolbar.frame)-top);
+	}
+	[self updateWebViewScrollViewContntInset];
         
 	backButton.frame = CGRectMake(CGRectGetWidth(deviceBounds)-180, 0, 44, 44);
 	forwardButton.frame = CGRectMake(CGRectGetWidth(deviceBounds)-120, 0, 44, 44);
@@ -355,6 +375,85 @@
 	[self layoutSubviews];
 }
 
+#pragma mark -
+#pragma mark UIScrollViewDelegate
+
+-(void)performSelectorOnWebView:(SEL)sel scrollView:(UIScrollView*)scrollView {
+	if([self.webView respondsToSelector:sel])
+		[self.webView performSelector:sel withObject:scrollView];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+
+	// webview itself resets contentOffset to origin(0,0) while loading
+	if(self.webView.loading) {
+		scrollView.contentOffset = CGPointMake(0, -scrollView.contentInset.top);
+	}
+
+	self.webViewScrollView.scrollIndicatorInsets = UIEdgeInsetsMake(MAX(0, -scrollView.contentOffset.y) , 0, 0, 0);
+
+	if(!self.obtrusiveNavBar) {
+		scrollView.bounces = scrollView.contentOffset.y > -scrollView.contentInset.top;
+		if(scrollView.contentOffset.y < -scrollView.contentInset.top)
+			scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, -scrollView.contentInset.top);
+	
+		CGRect r = navBar.frame;
+		navBar.frame = CGRectMake(r.origin.x, [self navBarY], r.size.width, r.size.height);
+	}
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+	if([self.webView respondsToSelector:_cmd])
+		[self.webView scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
+}
+
+- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+	if([self.webView respondsToSelector:_cmd])
+		return [self.webView performSelector:_cmd withObject:scrollView];
+	return nil;
+}
+
+- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view {
+	if([self.webView respondsToSelector:_cmd])
+		[self.webView scrollViewWillBeginZooming:scrollView withView:view];
+}
+
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(float)scale {
+	if([self.webView respondsToSelector:_cmd])
+		[self.webView scrollViewDidEndZooming:scrollView withView:view atScale:scale];
+}
+
+- (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView {
+	if([self.webView respondsToSelector:_cmd])
+		return [self.webView scrollViewShouldScrollToTop:scrollView];
+	return YES;
+}
+
+- (void)scrollViewDidScrollToTop:(UIScrollView *)scrollView {
+	[self performSelectorOnWebView:_cmd scrollView:scrollView];
+}
+
 
 #pragma mark -
 #pragma mark UIWebViewDelegate
@@ -366,12 +465,23 @@
         rWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleBottomMargin;
         rWebView.delegate = self;
         rWebView.scalesPageToFit = YES;
+        [self updateWebViewScrollViewContntInset];
+        self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
+        self.webViewScrollView.delegate = self;
         [self.view addSubview:rWebView];
     }
     
     return rWebView;
 }
 
+-(UIScrollView*) webViewScrollView {
+	return [self.webView.subviews lastObject];
+}
+
+-(void)updateWebViewScrollViewContntInset {
+	float verticalContentInset = self.obtrusiveNavBar ? 0 : 44;
+	self.webViewScrollView.contentInset = UIEdgeInsetsMake(verticalContentInset, 0, 0, 0);
+}
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	
