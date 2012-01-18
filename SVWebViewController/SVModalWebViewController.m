@@ -18,7 +18,7 @@
 
 @implementation SVModalWebViewController
 
-@synthesize barsTintColor, availableActions, webViewController;
+@synthesize barsTintColor, doneBarButtonItem, availableActions, doneBarButtonPosition, loadingBarButtonType, webViewController;
 
 #pragma mark - Initialization
 
@@ -33,8 +33,9 @@
 
 - (id)initWithURL:(NSURL *)URL {
     self.webViewController = [[[SVWebViewController alloc] initWithURL:URL] autorelease];
+    self.doneBarButtonPosition = SVWebViewControllerDoneBarButtonPositionLeft;
     if (self = [super initWithRootViewController:self.webViewController]) {
-        self.webViewController.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)] autorelease];
+        self.doneBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)] autorelease];
     }
     return self;
 }
@@ -42,11 +43,28 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    switch (self.webViewController.doneBarButtonPosition) {
+        case SVWebViewControllerDoneBarButtonPositionLeft:
+            self.webViewController.navigationItem.leftBarButtonItem = self.doneBarButtonItem;
+            break;
+        case SVWebViewControllerDoneBarButtonPositionRight:
+            self.webViewController.navigationItem.rightBarButtonItem = self.doneBarButtonItem;
+            break;
+    }
+    
     self.navigationBar.tintColor = self.toolbar.tintColor = self.barsTintColor;
 }
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
     self.webViewController.availableActions = newAvailableActions;
+}
+
+- (void)setDoneBarButtonPosition:(SVWebViewControllerDoneBarButtonPosition)newDoneBarButtonPosition {
+    self.webViewController.doneBarButtonPosition = newDoneBarButtonPosition;
+}
+
+- (void)setLoadingBarButtonType:(SVWebViewControllerLoadingBarButtonType)newLoadingBarButtonType {
+    self.webViewController.loadingBarButtonType = newLoadingBarButtonType;
 }
 
 @end
