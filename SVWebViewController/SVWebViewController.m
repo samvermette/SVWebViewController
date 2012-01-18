@@ -85,7 +85,7 @@
 - (UIBarButtonItem *)activityIndicatorBarButtonItem {
     
     if (!activityIndicatorBarButtonItem) {
-        UIActivityIndicatorView * activityView = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)];
+        UIActivityIndicatorView * activityView = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
         [activityView sizeToFit];
         [activityView setAutoresizingMask:(UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin)];
         [activityView startAnimating];
