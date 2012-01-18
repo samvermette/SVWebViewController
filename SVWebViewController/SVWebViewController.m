@@ -41,7 +41,7 @@
 @synthesize availableActions, loadingBarButtonType;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, activityIndicatorBarButtonItem, loadingBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, activityIndicatorBarButtonItem, loadingBarButtonItem, actionBarButtonItem, doneBarButtonPosition, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -279,7 +279,18 @@
         UIToolbar *toolbar = [[[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)] autorelease];
         toolbar.items = items;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:toolbar] autorelease];
+        
+        UIBarButtonItem *toolbarBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:toolbar] autorelease];
+        switch (self.doneBarButtonPosition) {
+            case SVWebViewControllerDoneBarButtonPositionRight:
+                self.navigationItem.leftBarButtonItem = toolbarBarButtonItem;
+                break;
+            case SVWebViewControllerDoneBarButtonPositionLeft:
+            default:
+                self.navigationItem.rightBarButtonItem = toolbarBarButtonItem;
+                break;
+        }
+        
     } 
     
     else {

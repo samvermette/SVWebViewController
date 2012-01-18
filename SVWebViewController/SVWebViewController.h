@@ -16,6 +16,7 @@
 - (id)initWithURL:(NSURL*)URL;
 
 @property (nonatomic, assign) SVWebViewControllerAvailableActions availableActions;
+@property (nonatomic, assign) SVWebViewControllerDoneBarButtonPosition doneBarButtonPosition;
 @property (nonatomic, assign) SVWebViewControllerLoadingBarButtonType loadingBarButtonType;
 
 @end

@@ -43,7 +43,7 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    switch (self.doneBarButtonPosition) {
+    switch (self.webViewController.doneBarButtonPosition) {
         case SVWebViewControllerDoneBarButtonPositionLeft:
             self.webViewController.navigationItem.leftBarButtonItem = self.doneBarButtonItem;
             break;
@@ -57,6 +57,10 @@
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
     self.webViewController.availableActions = newAvailableActions;
+}
+
+- (void)setDoneBarButtonPosition:(SVWebViewControllerDoneBarButtonPosition)newDoneBarButtonPosition {
+    self.webViewController.doneBarButtonPosition = newDoneBarButtonPosition;
 }
 
 - (void)setLoadingBarButtonType:(SVWebViewControllerLoadingBarButtonType)newLoadingBarButtonType {
