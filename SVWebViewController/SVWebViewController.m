@@ -14,6 +14,8 @@
 @property (nonatomic, retain, readonly) UIBarButtonItem *forwardBarButtonItem;
 @property (nonatomic, retain, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, retain, readonly) UIBarButtonItem *stopBarButtonItem;
+@property (nonatomic, retain, readonly) UIBarButtonItem *activityIndicatorBarButtonItem;
+@property (nonatomic, retain, readonly) UIBarButtonItem *loadingBarButtonItem;
 @property (nonatomic, retain, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, retain, readonly) UIActionSheet *pageActionSheet;
 
@@ -36,10 +38,10 @@
 
 @implementation SVWebViewController
 
-@synthesize availableActions;
+@synthesize availableActions, loadingBarButtonType;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, activityIndicatorBarButtonItem, loadingBarButtonItem, actionBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -78,6 +80,31 @@
         stopBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(stopClicked:)];
     }
     return stopBarButtonItem;
+}
+
+- (UIBarButtonItem *)activityIndicatorBarButtonItem {
+    
+    if (!activityIndicatorBarButtonItem) {
+        UIActivityIndicatorView * activityView = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)];
+        [activityView sizeToFit];
+        [activityView setAutoresizingMask:(UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin)];
+        [activityView startAnimating];
+        activityIndicatorBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:activityView];
+    }
+    return activityIndicatorBarButtonItem;
+}
+
+- (UIBarButtonItem *)loadingBarButtonItem {
+    
+    switch (self.loadingBarButtonType) {
+        case SVWebViewControllerLoadingBarButtonTypeActivityIndicator:
+            return self.activityIndicatorBarButtonItem;
+            break;
+        case SVWebViewControllerLoadingBarButtonTypeStop:
+        default:
+            return self.stopBarButtonItem;
+            break;
+    }
 }
 
 - (UIBarButtonItem *)actionBarButtonItem {
@@ -141,6 +168,8 @@
     [forwardBarButtonItem release];
     [refreshBarButtonItem release];
     [stopBarButtonItem release];
+    [activityIndicatorBarButtonItem release];
+    [loadingBarButtonItem release];
     [actionBarButtonItem release];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
@@ -173,6 +202,8 @@
     [forwardBarButtonItem release], forwardBarButtonItem = nil;
     [refreshBarButtonItem release], refreshBarButtonItem = nil;
     [stopBarButtonItem release], stopBarButtonItem = nil;
+    [activityIndicatorBarButtonItem release], activityIndicatorBarButtonItem = nil;
+    [loadingBarButtonItem release], loadingBarButtonItem = nil;
     [actionBarButtonItem release], actionBarButtonItem = nil;
     [pageActionSheet release], pageActionSheet = nil;
 }
@@ -210,7 +241,7 @@
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
     
-    UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
+    UIBarButtonItem *refreshLoadingBarButtonItem = self.mainWebView.isLoading ? self.loadingBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
     fixedSpace.width = 5.0f;
@@ -224,7 +255,7 @@
             toolbarWidth = 200.0f;
             items = [NSArray arrayWithObjects:
                      fixedSpace,
-                     refreshStopBarButtonItem,
+                     refreshLoadingBarButtonItem,
                      flexibleSpace,
                      self.backBarButtonItem,
                      flexibleSpace,
@@ -234,7 +265,7 @@
         } else {
             items = [NSArray arrayWithObjects:
                      fixedSpace,
-                     refreshStopBarButtonItem,
+                     refreshLoadingBarButtonItem,
                      flexibleSpace,
                      self.backBarButtonItem,
                      flexibleSpace,
@@ -260,7 +291,7 @@
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
-                     refreshStopBarButtonItem,
+                     refreshLoadingBarButtonItem,
                      flexibleSpace,
                      nil];
         } else {
@@ -270,7 +301,7 @@
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
-                     refreshStopBarButtonItem,
+                     refreshLoadingBarButtonItem,
                      flexibleSpace,
                      self.actionBarButtonItem,
                      fixedSpace,

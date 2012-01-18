@@ -18,7 +18,7 @@
 
 @implementation SVModalWebViewController
 
-@synthesize barsTintColor, doneBarButtonItem, availableActions, doneBarButtonPosition, webViewController;
+@synthesize barsTintColor, doneBarButtonItem, availableActions, doneBarButtonPosition, loadingBarButtonType, webViewController;
 
 #pragma mark - Initialization
 
@@ -57,6 +57,10 @@
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
     self.webViewController.availableActions = newAvailableActions;
+}
+
+- (void)setLoadingBarButtonType:(SVWebViewControllerLoadingBarButtonType)newLoadingBarButtonType {
+    self.webViewController.loadingBarButtonType = newLoadingBarButtonType;
 }
 
 @end

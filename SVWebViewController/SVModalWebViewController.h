@@ -20,8 +20,14 @@ enum {
     SVWebViewControllerDoneBarButtonPositionRight   = 2
 };
 
+enum {
+    SVWebViewControllerLoadingBarButtonTypeStop                 = 1,
+    SVWebViewControllerLoadingBarButtonTypeActivityIndicator    = 2
+};
+
 typedef NSUInteger SVWebViewControllerAvailableActions;
 typedef NSUInteger SVWebViewControllerDoneBarButtonPosition;
+typedef NSUInteger SVWebViewControllerLoadingBarButtonType;
 
 @class SVWebViewController;
 
@@ -34,5 +40,6 @@ typedef NSUInteger SVWebViewControllerDoneBarButtonPosition;
 @property (nonatomic, retain) UIBarButtonItem *doneBarButtonItem;
 @property (nonatomic, assign) SVWebViewControllerAvailableActions availableActions;
 @property (nonatomic, assign) SVWebViewControllerDoneBarButtonPosition doneBarButtonPosition;
+@property (nonatomic, assign) SVWebViewControllerLoadingBarButtonType loadingBarButtonType;
 
 @end
