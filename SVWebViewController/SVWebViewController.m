@@ -37,6 +37,8 @@
 @implementation SVWebViewController
 
 @synthesize availableActions;
+@synthesize tintColor;
+@synthesize customTitle;
 
 @synthesize URL, mainWebView;
 @synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
@@ -196,6 +198,10 @@
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
     
+    if (self.tintColor){
+        self.navigationController.toolbar.tintColor = self.tintColor;
+    }
+    
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
@@ -232,6 +238,9 @@
         }
         
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
+        if (self.tintColor){
+            toolbar.tintColor = self.tintColor;
+        }
         toolbar.items = items;
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
     } 
@@ -265,6 +274,8 @@
         
         self.toolbarItems = items;
     }
+    
+    
 }
 
 #pragma mark -
@@ -279,7 +290,12 @@
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
-    self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    if (self.customTitle){
+        self.navigationItem.title = self.customTitle;  
+    }else{
+        self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    }
+
     [self updateToolbarItems];
 }
 
