@@ -18,7 +18,7 @@
 
 @implementation SVModalWebViewController
 
-@synthesize barsTintColor, availableActions, webViewController;
+@synthesize barsTintColor, availableActions, modalWebViewControllerDelegate, webViewController;
 
 #pragma mark - Initialization
 
@@ -43,6 +43,17 @@
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
     self.webViewController.availableActions = newAvailableActions;
+}
+
+#pragma mark - Delegation
+
+- (void)setModalWebViewControllerDelegate:(id<SVModalWebViewControllerDelegate>)_modalWebViewControllerDelegate {
+    modalWebViewControllerDelegate = _modalWebViewControllerDelegate;
+    if ([self.modalWebViewControllerDelegate respondsToSelector:@selector(modalWebViewControllerDoneButtonTouched:)]) {
+        
+        self.webViewController.navigationItem.leftBarButtonItem.target = self.modalWebViewControllerDelegate;
+        self.webViewController.navigationItem.leftBarButtonItem.action = @selector(modalWebViewControllerDoneButtonTouched:);
+    }
 }
 
 @end
