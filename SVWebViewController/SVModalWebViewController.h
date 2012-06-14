@@ -19,6 +19,14 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 
 @class SVWebViewController;
+@class SVModalWebViewController;
+
+@protocol SVModalWebViewControllerDelegate <NSObject>
+@optional
+
+- (void)modalWebViewControllerDoneButtonTouched:(SVModalWebViewController *)modalWebViewController;
+
+@end
 
 @interface SVModalWebViewController : UINavigationController
 
@@ -27,5 +35,6 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
+@property (nonatomic, unsafe_unretained) id<SVModalWebViewControllerDelegate> modalWebViewControllerDelegate;
 
 @end
