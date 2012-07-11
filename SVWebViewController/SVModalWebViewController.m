@@ -45,4 +45,12 @@
     self.webViewController.availableActions = newAvailableActions;
 }
 
+-(void)setAlwaysShowNavigationBar:(BOOL)alwaysShowNavigationBar {
+    self.webViewController.alwaysShowNavigationBar = alwaysShowNavigationBar;
+}
+
+-(BOOL)alwaysShowNavigationBar {
+    return self.webViewController.alwaysShowNavigationBar;
+}
+
 @end
