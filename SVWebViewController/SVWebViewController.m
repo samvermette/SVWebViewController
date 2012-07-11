@@ -34,7 +34,7 @@
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
 
 - (void)updateWebViewScrollViewContentInset;
-- (void)updateNavigationBarPositionReset:(BOOL)reset animated:(BOOL)animated;
+- (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset;
 
 @end
 
@@ -181,7 +181,7 @@
 
 -(void)viewWillLayoutSubviews {
     [self updateWebViewScrollViewContentInset];
-    [self updateNavigationBarPositionReset:NO animated:NO];
+    [self updateNavigationBarPositionWithAnimationAndReset:NO];
     
     [super viewWillLayoutSubviews];
 }
@@ -190,9 +190,10 @@
     [super viewWillDisappear:animated];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.navigationController setToolbarHidden:YES animated:animated];
-        if(![self.parentViewController isKindOfClass:SVModalWebViewController.class])
-            [self updateNavigationBarPositionReset:YES animated:YES];
+        if(![self.parentViewController isKindOfClass:SVModalWebViewController.class]) {
+            [self updateNavigationBarPositionWithAnimationAndReset:YES];
+            [self.navigationController setToolbarHidden:YES animated:animated];
+        }
     }
 }
 
@@ -398,21 +399,18 @@
     self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
 }
 
-- (void)updateNavigationBarPositionReset:(BOOL)reset animated:(BOOL)animated {
+- (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset {
     if(!self.alwaysShowNavigationBar) {
-        if(animated) {
+        if(animationAndReset) {
             [UIView beginAnimations:@"navigationBarAnimation" context:nil];
         }
         UINavigationBar *navBar = self.navigationController.navigationBar;
         CGRect navRect = navBar.frame;
-        navRect.origin.y = 20;
-//        NSLog(@"updateNavigationBarPositionReset-frame: %@", NSStringFromCGRect(self.mainWebView.frame));
-//        NSLog(@"contentOffset: %@", NSStringFromCGPoint(self.webViewScrollView.contentOffset));
-//        NSLog(@"contentInset: %@", NSStringFromUIEdgeInsets(self.webViewScrollView.contentInset));
-        if(!reset)
+        navRect.origin = [navBar.superview convertPoint:CGPointMake(0, 0) fromView:self.mainWebView];
+        if(!animationAndReset)
             navRect.origin.y -= self.webViewScrollView.contentOffset.y + self.webViewScrollView.contentInset.top;
         navBar.frame = navRect;
-        if(animated){
+        if(animationAndReset){
             [UIView commitAnimations];
         }
     }
@@ -420,12 +418,10 @@
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    NSLog(@"scrollViewDidScroll-contentOffset: %@", NSStringFromCGPoint(self.webViewScrollView.contentOffset));
     if(self.mainWebView.loading && -scrollView.contentOffset.y < scrollView.contentInset.top) {
         scrollView.contentOffset = CGPointMake(0, -scrollView.contentInset.top);
-        NSLog(@"adjustd contentOffset");
     }
-    [self updateNavigationBarPositionReset:NO animated:NO];
+    [self updateNavigationBarPositionWithAnimationAndReset:NO];
 }
 
 @end
