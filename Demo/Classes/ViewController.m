@@ -15,6 +15,7 @@
 - (void)pushWebViewController {
     NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
 	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL];
+    webViewController.alwaysShowNavigationBar = NO;
 	[self.navigationController pushViewController:webViewController animated:YES];
 }
 
@@ -24,6 +25,7 @@
 	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
     webViewController.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsCopyLink | SVWebViewControllerAvailableActionsMailLink;
+    webViewController.alwaysShowNavigationBar = NO;
 	[self presentModalViewController:webViewController animated:YES];	
 }
 

@@ -8,7 +8,7 @@
 
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *forwardBarButtonItem;
@@ -19,6 +19,8 @@
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
+
+@property (nonatomic, readonly) UIScrollView *webViewScrollView;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -31,14 +33,16 @@
 - (void)stopClicked:(UIBarButtonItem *)sender;
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
 
-@end
+- (void)updateWebViewScrollViewContentInset;
+- (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset;
 
+@end
 
 @implementation SVWebViewController
 
 @synthesize availableActions;
 
-@synthesize URL, mainWebView;
+@synthesize URL, mainWebView, alwaysShowNavigationBar;
 @synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
@@ -116,13 +120,21 @@
 
 #pragma mark - Initialization
 
+- (id)init {
+    self = [super init];
+    if(self) {
+        self.alwaysShowNavigationBar = YES;
+    }
+    return self;
+}
+
 - (id)initWithAddress:(NSString *)urlString {
     return [self initWithURL:[NSURL URLWithString:urlString]];
 }
 
 - (id)initWithURL:(NSURL*)pageURL {
     
-    if(self = [super init]) {
+    if(self = [self init]) {
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
@@ -136,6 +148,7 @@
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
+    self.webViewScrollView.delegate = self;
     [mainWebView loadRequest:[NSURLRequest requestWithURL:self.URL]];
     self.view = mainWebView;
 }
@@ -166,10 +179,18 @@
     }
 }
 
+-(void)viewWillLayoutSubviews {
+    [self updateWebViewScrollViewContentInset];
+    [self updateNavigationBarPositionWithAnimationAndReset:NO];
+    
+    [super viewWillLayoutSubviews];
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && ![self.parentViewController isKindOfClass:SVModalWebViewController.class]) {
+        [self updateNavigationBarPositionWithAnimationAndReset:YES];
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
 }
@@ -353,6 +374,54 @@
                         error:(NSError *)error 
 {
 	[self dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark -
+#pragma mark UIScrollViewDelegate / alwaysShowNavigationBar
+
+-(UIScrollView *)webViewScrollView {
+    return [self.mainWebView.subviews lastObject];
+}
+
+-(void)setAlwaysShowNavigationBar:(BOOL)value {
+    alwaysShowNavigationBar = value;
+    [self updateWebViewScrollViewContentInset];
+}
+
+-(void)updateWebViewScrollViewContentInset {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        if(self.navigationController.navigationBar) {
+            self.webViewScrollView.contentInset = self.alwaysShowNavigationBar ? UIEdgeInsetsZero
+                : UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height, 0, 0, 0);
+            self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
+        }
+        self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
+    }
+}
+
+- (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset {
+    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && !self.alwaysShowNavigationBar) {
+        if(animationAndReset) {
+            [UIView beginAnimations:@"navigationBarAnimation" context:nil];
+        }
+        UINavigationBar *navBar = self.navigationController.navigationBar;
+        CGRect navRect = navBar.frame;
+        navRect.origin = [navBar.superview convertPoint:CGPointMake(0, 0) fromView:self.mainWebView];
+        if(!animationAndReset)
+            navRect.origin.y -= self.webViewScrollView.contentOffset.y + self.webViewScrollView.contentInset.top;
+        navBar.frame = navRect;
+        if(animationAndReset){
+            [UIView commitAnimations];
+        }
+    }
+    
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(self.mainWebView.loading && -scrollView.contentOffset.y < scrollView.contentInset.top) {
+        scrollView.contentOffset = CGPointMake(0, -scrollView.contentInset.top);
+    }
+    [self updateNavigationBarPositionWithAnimationAndReset:NO];
 }
 
 @end
