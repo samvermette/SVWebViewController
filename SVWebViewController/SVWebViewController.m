@@ -189,11 +189,9 @@
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        if(![self.parentViewController isKindOfClass:SVModalWebViewController.class]) {
-            [self updateNavigationBarPositionWithAnimationAndReset:YES];
-            [self.navigationController setToolbarHidden:YES animated:animated];
-        }
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && ![self.parentViewController isKindOfClass:SVModalWebViewController.class]) {
+        [self updateNavigationBarPositionWithAnimationAndReset:YES];
+        [self.navigationController setToolbarHidden:YES animated:animated];
     }
 }
 
@@ -391,16 +389,18 @@
 }
 
 -(void)updateWebViewScrollViewContentInset {
-    if(self.navigationController.navigationBar) {
-        self.webViewScrollView.contentInset = self.alwaysShowNavigationBar ? UIEdgeInsetsZero
-            : UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height, 0, 0, 0);
-        self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        if(self.navigationController.navigationBar) {
+            self.webViewScrollView.contentInset = self.alwaysShowNavigationBar ? UIEdgeInsetsZero
+                : UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height, 0, 0, 0);
+            self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
+        }
+        self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
     }
-    self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
 }
 
 - (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset {
-    if(!self.alwaysShowNavigationBar) {
+    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && !self.alwaysShowNavigationBar) {
         if(animationAndReset) {
             [UIView beginAnimations:@"navigationBarAnimation" context:nil];
         }
