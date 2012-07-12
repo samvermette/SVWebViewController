@@ -18,7 +18,7 @@
 
 @implementation SVModalWebViewController
 
-@synthesize barsTintColor, availableActions, webViewController;
+@synthesize barsTintColor, webViewController;
 
 #pragma mark - Initialization
 
@@ -41,8 +41,20 @@
     self.navigationBar.tintColor = self.toolbar.tintColor = self.barsTintColor;
 }
 
-- (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
-    self.webViewController.availableActions = newAvailableActions;
+-(NSArray *)excludedActivityTypes {
+    return self.webViewController.excludedActivityTypes;
+}
+
+-(void)setExcludedActivityTypes:(NSArray *)excludedActivityTypes {
+    self.webViewController.excludedActivityTypes = excludedActivityTypes;
+}
+
+-(NSArray *)applicationActivities {
+    return self.webViewController.excludedActivityTypes;
+}
+
+-(void)setApplicationActivities:(NSArray *)applicationActivities {
+    self.webViewController.applicationActivities = applicationActivities;
 }
 
 -(void)setAlwaysShowNavigationBar:(BOOL)alwaysShowNavigationBar {

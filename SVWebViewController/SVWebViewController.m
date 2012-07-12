@@ -8,7 +8,31 @@
 
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UIScrollViewDelegate>
+@interface SVActivity()
+
+@property (nonatomic, strong) SVWebViewController* webViewController;
+
+@end
+
+@interface SVActivitySafari : SVActivity
+@end
+
+NSString *const SVActivityTypeSafari = @"activity.Safari";
+
+@interface NSActivityCopyToPasteboard : SVActivity
+@end
+
+NSString *const SVActivityTypeCopyToPasteboard = @"activity.CopyToPasteboard";
+
+@interface SVActivityMail : SVActivity<MFMailComposeViewControllerDelegate>
+@end
+
+NSString *const SVActivityTypeMail = @"activity.Mail";
+
+#pragma mark -
+#pragma mark SVWebViewController
+
+@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *forwardBarButtonItem;
@@ -16,6 +40,9 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
+@property (nonatomic, strong, readonly) NSArray *presentedActivities;
+@property (nonatomic, strong, readonly) UIViewController *presentedActivityViewController;
+@property (nonatomic, strong, readonly) SVActivity *selectedActivity;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -36,14 +63,18 @@
 - (void)updateWebViewScrollViewContentInset;
 - (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset;
 
+- (BOOL)hasActivities;
+- (void)activityDidFinish:(SVActivity*)activity;
+
 @end
 
 @implementation SVWebViewController
 
-@synthesize availableActions;
+@synthesize excludedActivityTypes, applicationActivities;
 
 @synthesize URL, mainWebView, alwaysShowNavigationBar;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem;
+@synthesize pageActionSheet, presentedActivities, selectedActivity, presentedActivityViewController;
 
 #pragma mark - setters and getters
 
@@ -92,8 +123,30 @@
     return actionBarButtonItem;
 }
 
+- (BOOL)hasActivities {
+    if(self.applicationActivities.count > 0)
+        return YES;
+    NSMutableArray *remainingBuiltinActivityTypes = [NSMutableArray arrayWithObjects:SVActivityTypeSafari, SVActivityTypeMail, SVActivityTypeCopyToPasteboard, nil];
+    [remainingBuiltinActivityTypes removeObjectsInArray:self.excludedActivityTypes];
+    return remainingBuiltinActivityTypes.count > 0;
+}
+
+- (NSArray*)presentedActivities {
+    if(!presentedActivities) {
+        NSMutableArray* activities = [NSMutableArray array];
+        if(![self.excludedActivityTypes containsObject:SVActivityTypeSafari])
+           [activities addObject:[SVActivitySafari new]];
+        if(![self.excludedActivityTypes containsObject:SVActivityTypeMail])
+            [activities addObject:[SVActivityMail new]];
+        if(![self.excludedActivityTypes containsObject:SVActivityTypeCopyToPasteboard])
+            [activities addObject:[NSActivityCopyToPasteboard new]];
+        
+        presentedActivities = activities;
+    }
+    return presentedActivities;
+}
+
 - (UIActionSheet *)pageActionSheet {
-    
     if(!pageActionSheet) {
         pageActionSheet = [[UIActionSheet alloc] 
                         initWithTitle:self.mainWebView.request.URL.absoluteString
@@ -102,14 +155,9 @@
                         destructiveButtonTitle:nil   
                         otherButtonTitles:nil]; 
 
-        if((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) == SVWebViewControllerAvailableActionsCopyLink)
-            [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Copy Link", @"")];
-        
-        if((self.availableActions & SVWebViewControllerAvailableActionsOpenInSafari) == SVWebViewControllerAvailableActionsOpenInSafari)
-            [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Open in Safari", @"")];
-        
-        if([MFMailComposeViewController canSendMail] && (self.availableActions & SVWebViewControllerAvailableActionsMailLink) == SVWebViewControllerAvailableActionsMailLink)
-            [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Mail Link to this Page", @"")];
+        for(SVActivity* activity in self.presentedActivities) {
+            [pageActionSheet addButtonWithTitle:activity.activityTitle];
+        }
         
         [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Cancel", @"")];
         pageActionSheet.cancelButtonIndex = [self.pageActionSheet numberOfButtons]-1;
@@ -124,6 +172,7 @@
     self = [super init];
     if(self) {
         self.alwaysShowNavigationBar = YES;
+        self.excludedActivityTypes = [NSArray arrayWithObject:SVActivityTypeCopyToPasteboard];
     }
     return self;
 }
@@ -136,7 +185,6 @@
     
     if(self = [self init]) {
         self.URL = pageURL;
-        self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
     
     return self;
@@ -220,7 +268,7 @@
         NSArray *items;
         CGFloat toolbarWidth = 250.0f;
         
-        if(self.availableActions == 0) {
+        if(!self.hasActivities) {
             toolbarWidth = 200.0f;
             items = [NSArray arrayWithObjects:
                      fixedSpace,
@@ -253,7 +301,7 @@
     else {
         NSArray *items;
         
-        if(self.availableActions == 0) {
+        if(!self.hasActivities) {
             items = [NSArray arrayWithObjects:
                      flexibleSpace,
                      self.backBarButtonItem, 
@@ -322,7 +370,6 @@
 }
 
 - (void)actionButtonClicked:(id)sender {
-    
     if(pageActionSheet)
         return;
 	
@@ -341,39 +388,25 @@
 #pragma mark UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
-    
-	if([title isEqualToString:NSLocalizedString(@"Open in Safari", @"")])
-        [[UIApplication sharedApplication] openURL:self.mainWebView.request.URL];
-    
-    if([title isEqualToString:NSLocalizedString(@"Copy Link", @"")]) {
-        UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-        pasteboard.string = self.mainWebView.request.URL.absoluteString;
+    if(buttonIndex < presentedActivities.count) {
+        selectedActivity = [presentedActivities objectAtIndex:buttonIndex];
+        selectedActivity.webViewController = self;
+        
+        presentedActivityViewController = selectedActivity.activityViewController;
+        if(presentedActivityViewController) {
+            [self presentModalViewController:presentedActivityViewController animated:YES];
+        } else {
+            [selectedActivity performActivity];
+        }
     }
-    
-    else if([title isEqualToString:NSLocalizedString(@"Mail Link to this Page", @"")]) {
-        
-		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
-        
-		mailViewController.mailComposeDelegate = self;
-        [mailViewController setSubject:[self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.title"]];
-  		[mailViewController setMessageBody:self.mainWebView.request.URL.absoluteString isHTML:NO];
-		mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
-        
-		[self presentModalViewController:mailViewController animated:YES];
-	}
-    
     pageActionSheet = nil;
+    presentedActivities = nil;
 }
 
-#pragma mark -
-#pragma mark MFMailComposeViewControllerDelegate
-
-- (void)mailComposeController:(MFMailComposeViewController *)controller 
-          didFinishWithResult:(MFMailComposeResult)result 
-                        error:(NSError *)error 
-{
-	[self dismissModalViewControllerAnimated:YES];
+- (void)activityDidFinish:(SVActivity*)activity {
+    [self.presentedActivityViewController dismissModalViewControllerAnimated:YES];
+    selectedActivity = nil;
+    presentedActivityViewController = nil;
 }
 
 #pragma mark -
@@ -393,7 +426,8 @@
         if(self.navigationController.navigationBar) {
             self.webViewScrollView.contentInset = self.alwaysShowNavigationBar ? UIEdgeInsetsZero
                 : UIEdgeInsetsMake(self.navigationController.navigationBar.frame.size.height, 0, 0, 0);
-            self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
+            if(!pageActionSheet) // prevent scrolling when showing action sheet
+                self.webViewScrollView.contentOffset = CGPointMake(0, -self.webViewScrollView.contentInset.top);
         }
         self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
     }
@@ -428,6 +462,91 @@
     }
     
     [self updateNavigationBarPositionWithAnimationAndReset:NO];
+}
+
+@end
+
+#pragma mark -
+#pragma mark SVActivities
+
+@implementation SVActivity
+
+@synthesize webViewController;
+
+-(UIWebView *)webView {
+    return webViewController.mainWebView;
+}
+
+- (void)activityDidFinish:(BOOL)completed {
+    [self.webViewController activityDidFinish:self];
+}
+
+-(NSString *)activityTitle {
+    // to be implemented by descendent
+    return nil;
+}
+
+- (UIViewController *)activityViewController {
+    // to be implemented by descendent if it does not provied performActivity
+    return nil;
+}
+
+-(void)performActivity {
+    // to be implemented by descendent if it does not provied activityViewController
+}
+
+@end
+
+
+@implementation SVActivitySafari
+
+-(NSString *)activityTitle {
+    return NSLocalizedString(@"Open in Safari", @"");
+}
+
+-(void)performActivity {
+    BOOL succeeded = [[UIApplication sharedApplication] openURL:self.webView.request.URL];
+    [self activityDidFinish:succeeded];
+}
+
+@end
+
+@implementation SVActivityMail
+
+-(NSString *)activityTitle {
+    return NSLocalizedString(@"Mail Link to this Page", @"");
+}
+
+-(UIViewController *)activityViewController {
+    MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
+    
+    mailViewController.mailComposeDelegate = self;
+    [mailViewController setSubject:[self.webView stringByEvaluatingJavaScriptFromString:@"document.title"]];
+    [mailViewController setMessageBody:self.webView.request.URL.absoluteString isHTML:NO];
+    mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
+    
+    return mailViewController;
+}
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller 
+          didFinishWithResult:(MFMailComposeResult)result 
+                        error:(NSError *)error 
+{
+	[self activityDidFinish:result == MFMailComposeResultSaved || result == MFMailComposeResultSent];
+}
+
+@end
+
+@implementation NSActivityCopyToPasteboard
+
+-(NSString *)activityTitle {
+    return NSLocalizedString(@"Copy Link", @"");
+}
+
+-(void)performActivity {
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    pasteboard.string = self.webView.request.URL.absoluteString;
+    [self activityDidFinish:YES];
 }
 
 @end

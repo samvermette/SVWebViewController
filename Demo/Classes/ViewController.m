@@ -24,7 +24,7 @@
 	NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
 	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
-    webViewController.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsCopyLink | SVWebViewControllerAvailableActionsMailLink;
+    webViewController.excludedActivityTypes = [NSArray arrayWithObjects:SVActivityTypeCopyToPasteboard, nil];
     webViewController.alwaysShowNavigationBar = NO;
 	[self presentModalViewController:webViewController animated:YES];	
 }
