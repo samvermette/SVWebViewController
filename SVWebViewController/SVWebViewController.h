@@ -10,23 +10,6 @@
 
 #import "SVModalWebViewController.h"
 
-@interface SVActivity : NSObject 
-
-@property (strong, readonly) UIWebView *webView;
-
-- (NSString *)activityTitle;
-- (UIViewController *)activityViewController;
-- (void)performActivity;
-
-- (void)activityDidFinish:(BOOL)completed;
-
-@end
-
-extern NSString *const SVActivityTypeSafari;
-extern NSString *const SVActivityTypeMail;
-extern NSString *const SVActivityTypeCopyToPasteboard;
-
-
 @interface SVWebViewController : UIViewController
 
 - (id)initWithAddress:(NSString*)urlString;
