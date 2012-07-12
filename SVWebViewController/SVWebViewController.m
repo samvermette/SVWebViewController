@@ -141,6 +141,8 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
         if(![self.excludedActivityTypes containsObject:SVActivityTypeCopyToPasteboard])
             [activities addObject:[NSActivityCopyToPasteboard new]];
         
+        [activities addObjectsFromArray:self.applicationActivities];
+        
         presentedActivities = activities;
     }
     return presentedActivities;
