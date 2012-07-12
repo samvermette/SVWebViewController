@@ -9,6 +9,23 @@
 #import "ViewController.h"
 #import "SVWebViewController.h"
 
+@interface MyCustomActivity : SVActivity
+@end
+
+@implementation MyCustomActivity
+
+-(NSString *)activityTitle {
+    return @"Custom Activity";
+}
+
+-(void)performActivity {
+    // if you want to display a view controller override activityViewController instead
+    NSString *message = self.webView.request.URL.absoluteString;
+    [[[UIAlertView alloc] initWithTitle:@"custom activity" message:message delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil] show];
+}
+
+@end
+
 @implementation ViewController
 
 
@@ -24,7 +41,8 @@
 	NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
 	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
-    webViewController.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsCopyLink | SVWebViewControllerAvailableActionsMailLink;
+    webViewController.excludedActivityTypes = [NSArray arrayWithObjects:SVActivityTypeMail, SVActivityTypeSafari, nil];
+    webViewController.applicationActivities = [NSArray arrayWithObject:[MyCustomActivity new]];
     webViewController.alwaysShowNavigationBar = NO;
 	[self presentModalViewController:webViewController animated:YES];	
 }
