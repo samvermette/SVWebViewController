@@ -8,26 +8,26 @@
 
 #import "SVWebViewController.h"
 
-@interface SVActivity()
+@interface SVWebViewControllerActivity()
 
 @property (nonatomic, strong) SVWebViewController* webViewController;
 
 @end
 
-@interface SVActivitySafari : SVActivity
+@interface SVWebViewControllerActivitySafari : SVWebViewControllerActivity
 @end
 
-NSString *const SVActivityTypeSafari = @"activity.Safari";
+NSString *const SVWebViewControllerActivityTypeSafari = @"activity.Safari";
 
-@interface NSActivityCopyToPasteboard : SVActivity
+@interface SVWebViewControllerActivityCopyToPasteboard : SVWebViewControllerActivity
 @end
 
-NSString *const SVActivityTypeCopyToPasteboard = @"activity.CopyToPasteboard";
+NSString *const SVWebViewControllerActivityTypeCopyToPasteboard = @"activity.CopyToPasteboard";
 
-@interface SVActivityMail : SVActivity<MFMailComposeViewControllerDelegate>
+@interface SVWebViewControllerActivityMail : SVWebViewControllerActivity<MFMailComposeViewControllerDelegate>
 @end
 
-NSString *const SVActivityTypeMail = @"activity.Mail";
+NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 
 #pragma mark -
 #pragma mark SVWebViewController
@@ -42,7 +42,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 @property (nonatomic, strong, readonly) NSArray *presentedActivities;
 @property (nonatomic, strong, readonly) UIViewController *presentedActivityViewController;
-@property (nonatomic, strong, readonly) SVActivity *selectedActivity;
+@property (nonatomic, strong, readonly) SVWebViewControllerActivity *selectedActivity;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -64,7 +64,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 - (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset;
 
 - (BOOL)hasActivities;
-- (void)activityDidFinish:(SVActivity*)activity;
+- (void)activityDidFinish:(SVWebViewControllerActivity*)activity;
 
 @end
 
@@ -126,7 +126,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 - (BOOL)hasActivities {
     if(self.applicationActivities.count > 0)
         return YES;
-    NSMutableArray *remainingBuiltinActivityTypes = [NSMutableArray arrayWithObjects:SVActivityTypeSafari, SVActivityTypeMail, SVActivityTypeCopyToPasteboard, nil];
+    NSMutableArray *remainingBuiltinActivityTypes = [NSMutableArray arrayWithObjects:SVWebViewControllerActivityTypeSafari, SVWebViewControllerActivityTypeMail, SVWebViewControllerActivityTypeCopyToPasteboard, nil];
     [remainingBuiltinActivityTypes removeObjectsInArray:self.excludedActivityTypes];
     return remainingBuiltinActivityTypes.count > 0;
 }
@@ -134,12 +134,12 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 - (NSArray*)presentedActivities {
     if(!presentedActivities) {
         NSMutableArray* activities = [NSMutableArray array];
-        if(![self.excludedActivityTypes containsObject:SVActivityTypeSafari])
-           [activities addObject:[SVActivitySafari new]];
-        if(![self.excludedActivityTypes containsObject:SVActivityTypeMail])
-            [activities addObject:[SVActivityMail new]];
-        if(![self.excludedActivityTypes containsObject:SVActivityTypeCopyToPasteboard])
-            [activities addObject:[NSActivityCopyToPasteboard new]];
+        if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeSafari])
+           [activities addObject:[SVWebViewControllerActivitySafari new]];
+        if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeMail])
+            [activities addObject:[SVWebViewControllerActivityMail new]];
+        if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeCopyToPasteboard])
+            [activities addObject:[SVWebViewControllerActivityCopyToPasteboard new]];
         
         [activities addObjectsFromArray:self.applicationActivities];
         
@@ -157,7 +157,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
                         destructiveButtonTitle:nil   
                         otherButtonTitles:nil]; 
 
-        for(SVActivity* activity in self.presentedActivities) {
+        for(SVWebViewControllerActivity* activity in self.presentedActivities) {
             [pageActionSheet addButtonWithTitle:activity.activityTitle];
         }
         
@@ -174,7 +174,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
     self = [super init];
     if(self) {
         self.alwaysShowNavigationBar = YES;
-        self.excludedActivityTypes = [NSArray arrayWithObject:SVActivityTypeCopyToPasteboard];
+        self.excludedActivityTypes = [NSArray arrayWithObject:SVWebViewControllerActivityTypeCopyToPasteboard];
     }
     return self;
 }
@@ -405,7 +405,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
     presentedActivities = nil;
 }
 
-- (void)activityDidFinish:(SVActivity*)activity {
+- (void)activityDidFinish:(SVWebViewControllerActivity*)activity {
     [self.presentedActivityViewController dismissModalViewControllerAnimated:YES];
     selectedActivity = nil;
     presentedActivityViewController = nil;
@@ -471,7 +471,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 #pragma mark -
 #pragma mark SVActivities
 
-@implementation SVActivity
+@implementation SVWebViewControllerActivity
 
 @synthesize webViewController;
 
@@ -500,7 +500,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 @end
 
 
-@implementation SVActivitySafari
+@implementation SVWebViewControllerActivitySafari
 
 -(NSString *)activityTitle {
     return NSLocalizedString(@"Open in Safari", @"");
@@ -513,7 +513,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 
 @end
 
-@implementation SVActivityMail
+@implementation SVWebViewControllerActivityMail
 
 -(NSString *)activityTitle {
     return NSLocalizedString(@"Mail Link to this Page", @"");
@@ -539,7 +539,7 @@ NSString *const SVActivityTypeMail = @"activity.Mail";
 
 @end
 
-@implementation NSActivityCopyToPasteboard
+@implementation SVWebViewControllerActivityCopyToPasteboard
 
 -(NSString *)activityTitle {
     return NSLocalizedString(@"Copy Link", @"");

@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "SVWebViewController.h"
 
-@interface MyCustomActivity : SVActivity
+@interface MyCustomActivity : SVWebViewControllerActivity
 @end
 
 @implementation MyCustomActivity
@@ -41,7 +41,7 @@
 	NSURL *URL = [NSURL URLWithString:@"http://en.wikipedia.org/wiki/Friday_(Rebecca_Black_song)"];
 	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
-    webViewController.excludedActivityTypes = [NSArray arrayWithObjects:SVActivityTypeMail, SVActivityTypeSafari, nil];
+    webViewController.excludedActivityTypes = [NSArray arrayWithObjects:SVWebViewControllerActivityTypeMail, SVWebViewControllerActivityTypeSafari, nil];
     webViewController.applicationActivities = [NSArray arrayWithObject:[MyCustomActivity new]];
     webViewController.alwaysShowNavigationBar = NO;
 	[self presentModalViewController:webViewController animated:YES];	

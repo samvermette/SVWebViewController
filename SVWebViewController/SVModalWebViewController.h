@@ -23,7 +23,7 @@
 
 @end
 
-@interface SVActivity : NSObject 
+@interface SVWebViewControllerActivity : NSObject 
 
 @property (strong, readonly) UIWebView *webView;
 
@@ -35,6 +35,6 @@
 
 @end
 
-extern NSString *const SVActivityTypeSafari;
-extern NSString *const SVActivityTypeMail;
-extern NSString *const SVActivityTypeCopyToPasteboard;
+extern NSString *const SVWebViewControllerActivityTypeSafari;
+extern NSString *const SVWebViewControllerActivityTypeMail;
+extern NSString *const SVWebViewControllerActivityTypeCopyToPasteboard;
