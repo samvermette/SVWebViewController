@@ -10,6 +10,10 @@
 
 #import "SVModalWebViewController.h"
 
+extern BOOL SVWebViewMediaPlaybackRequiresUserAction;
+extern BOOL SVWebViewMediaAllowsInlineMediaPlayback;
+extern BOOL SVWebViewMediaPlaybackAllowsAirPlay;
+
 @interface SVWebViewController : UIViewController
 
 - (id)initWithAddress:(NSString*)urlString;

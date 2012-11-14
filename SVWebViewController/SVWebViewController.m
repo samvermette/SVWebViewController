@@ -8,6 +8,11 @@
 
 #import "SVWebViewController.h"
 
+
+BOOL SVWebViewMediaPlaybackRequiresUserAction = YES;
+BOOL SVWebViewMediaAllowsInlineMediaPlayback = NO;
+BOOL SVWebViewMediaPlaybackAllowsAirPlay = YES;
+
 @interface SVWebViewControllerActivity()
 
 @property (nonatomic, strong) SVWebViewController* webViewController;
@@ -198,6 +203,10 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
+    mainWebView.mediaPlaybackRequiresUserAction = SVWebViewMediaPlaybackRequiresUserAction;
+    mainWebView.allowsInlineMediaPlayback = SVWebViewMediaAllowsInlineMediaPlayback;
+    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
+        mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
     self.webViewScrollView.delegate = self;
     [mainWebView loadRequest:[NSURLRequest requestWithURL:self.URL]];
     self.view = mainWebView;
