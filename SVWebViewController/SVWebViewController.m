@@ -245,12 +245,23 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     }
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         return YES;
     
     return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
+}
+
+- (void)dealloc
+{
+    [mainWebView stopLoading];
+ 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    mainWebView.delegate = nil;
 }
 
 #pragma mark - Toolbar
@@ -297,6 +308,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
+        toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
     } 
     
@@ -372,6 +384,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 }
 
 - (void)actionButtonClicked:(id)sender {
+    
     if(pageActionSheet)
         return;
 	
@@ -383,7 +396,11 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 }
 
 - (void)doneButtonClicked:(id)sender {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
     [self dismissModalViewControllerAnimated:YES];
+#else
+    [self dismissViewControllerAnimated:YES completion:NULL];
+#endif
 }
 
 #pragma mark -
@@ -396,7 +413,11 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         
         presentedActivityViewController = selectedActivity.activityViewController;
         if(presentedActivityViewController) {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
             [self presentModalViewController:presentedActivityViewController animated:YES];
+#else
+            [self presentViewController:presentedActivityViewController animated:YES completion:NULL];
+#endif        
         } else {
             [selectedActivity performActivity];
         }
@@ -406,7 +427,11 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 }
 
 - (void)activityDidFinish:(SVWebViewControllerActivity*)activity {
-    [self.presentedActivityViewController dismissModalViewControllerAnimated:YES];
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
+    [self dismissModalViewControllerAnimated:YES];
+#else
+    [self dismissViewControllerAnimated:YES completion:NULL];
+#endif    
     selectedActivity = nil;
     presentedActivityViewController = nil;
 }
