@@ -150,7 +150,8 @@
 
 -(void) loadURL:(NSURL*) url
 {
-//    [mainWebView stringByEvaluatingJavaScriptFromString:@"document.body.innerHTML = \"\";"];
+    
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
     self.URL = url;
     NSURL *pageUrl = url;
     
@@ -309,8 +310,6 @@
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self.indicator stopAnimating];
-
-    self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
 }
 
