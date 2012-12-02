@@ -151,6 +151,7 @@
 
 -(void) loadURL:(NSURL*) url
 {
+    [mainWebView stringByEvaluatingJavaScriptFromString:@"document.body.innerHTML = \"\";"];
     self.URL = url;
     NSURL *pageUrl = url;
     if (self.mobiliserEnabled) {
