@@ -151,12 +151,18 @@
 
 -(void) loadURL:(NSURL*) url
 {
-    NSURL *pageUrl = self.URL;
+    self.URL = url;
+    NSURL *pageUrl = url;
     if (self.mobiliserEnabled) {
         NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
         pageUrl = [NSURL URLWithString:mobilisedUrlString];
     }
     [mainWebView loadRequest:[NSURLRequest requestWithURL:pageUrl]];
+}
+
+- (void)loadAddress:(NSString*)address;
+{
+    [self loadURL:[NSURL URLWithString:address]];
 }
 
 #pragma mark - View lifecycle
