@@ -22,8 +22,6 @@
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
 
-@property (assign) BOOL mobiliserEnabled;
-
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
@@ -141,7 +139,6 @@
 - (id)initWithURL:(NSURL*)pageURL {
     
     if(self = [super init]) {
-        self.mobiliserEnabled = YES;
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
@@ -154,7 +151,9 @@
     [mainWebView stringByEvaluatingJavaScriptFromString:@"document.body.innerHTML = \"\";"];
     self.URL = url;
     NSURL *pageUrl = url;
-    if (self.mobiliserEnabled) {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if ([userDefaults boolForKey:@"mobiliserEnabled"]) {
         NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
         pageUrl = [NSURL URLWithString:mobilisedUrlString];
     }
@@ -236,7 +235,9 @@
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
     self.mobiliserBarButtonItem.enabled = YES;
-    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:self.mobiliserEnabled];
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
 
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
@@ -343,8 +344,9 @@
 
 -(void)mobiliserButtonClicked:(UISwitch *)sender
 {
-    NSLog(@"mobiliserButtonClicked");
-    self.mobiliserEnabled = !self.mobiliserEnabled;
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:![userDefaults boolForKey:@"mobiliserEnabled"] forKey:@"mobiliserEnabled"];
+    [userDefaults synchronize];
     [self loadURL:self.URL];
 }
 
