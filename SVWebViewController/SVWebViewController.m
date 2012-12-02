@@ -17,6 +17,8 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
 
+@property (nonatomic, strong) UIActivityIndicatorView *indicator;
+
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
@@ -107,13 +109,13 @@
 - (UIActionSheet *)pageActionSheet {
     
     if(!pageActionSheet) {
-        pageActionSheet = [[UIActionSheet alloc] 
-                        initWithTitle:self.mainWebView.request.URL.absoluteString
-                        delegate:self 
-                        cancelButtonTitle:nil   
-                        destructiveButtonTitle:nil   
-                        otherButtonTitles:nil]; 
-
+        pageActionSheet = [[UIActionSheet alloc]
+                           initWithTitle:self.mainWebView.request.URL.absoluteString
+                           delegate:self
+                           cancelButtonTitle:nil
+                           destructiveButtonTitle:nil
+                           otherButtonTitles:nil];
+        
         if((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) == SVWebViewControllerAvailableActionsCopyLink)
             [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Copy Link", @"")];
         
@@ -148,7 +150,7 @@
 
 -(void) loadURL:(NSURL*) url
 {
-    [mainWebView stringByEvaluatingJavaScriptFromString:@"document.body.innerHTML = \"\";"];
+//    [mainWebView stringByEvaluatingJavaScriptFromString:@"document.body.innerHTML = \"\";"];
     self.URL = url;
     NSURL *pageUrl = url;
     
@@ -179,6 +181,14 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+    
+    self.indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    self.indicator.hidesWhenStopped = YES;
+    [self.indicator stopAnimating];
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.indicator];
+    
+    
     [self updateToolbarItems];
 }
 
@@ -198,6 +208,8 @@
     
 	[super viewWillAppear:animated];
 	
+    self.indicator.center = self.mainWebView.center;
+    
     [self.navigationController setToolbarHidden:NO animated:animated];
 }
 
@@ -239,55 +251,46 @@
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
-
+    
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     fixedSpace.width = 5.0f;
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     
-
-//        
-//        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
-//        toolbar.items = items;
-//        toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-//        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
-//        
-//        [self.navigationController setToolbarHidden:NO];
-//        self.toolbarItems = items;
-
-        NSArray *items;
-        
-        if(self.availableActions == 0) {
-            items = [NSArray arrayWithObjects:
-                     flexibleSpace,
-                     self.backBarButtonItem, 
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.mobiliserBarButtonItem,
-                     fixedSpace,
-                     nil];
-        } else {
-            items = [NSArray arrayWithObjects:
-                     fixedSpace,
-                     self.backBarButtonItem, 
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.actionBarButtonItem,
-                     flexibleSpace,
-                     self.mobiliserBarButtonItem,
-                     fixedSpace,
-                     nil];
-        }
     
-        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-        self.toolbarItems = items;
+    NSArray *items;
+    
+    if(self.availableActions == 0) {
+        items = [NSArray arrayWithObjects:
+                 flexibleSpace,
+                 self.backBarButtonItem,
+                 flexibleSpace,
+                 self.forwardBarButtonItem,
+                 flexibleSpace,
+                 refreshStopBarButtonItem,
+                 flexibleSpace,
+                 self.mobiliserBarButtonItem,
+                 fixedSpace,
+                 nil];
+    } else {
+        items = [NSArray arrayWithObjects:
+                 fixedSpace,
+                 self.backBarButtonItem,
+                 flexibleSpace,
+                 self.forwardBarButtonItem,
+                 flexibleSpace,
+                 refreshStopBarButtonItem,
+                 flexibleSpace,
+                 self.actionBarButtonItem,
+                 flexibleSpace,
+                 self.mobiliserBarButtonItem,
+                 fixedSpace,
+                 nil];
+    }
+    
+    self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+    self.toolbarItems = items;
     
 }
 
@@ -296,13 +299,17 @@
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    
+    [self.indicator startAnimating];
+    
     [self updateToolbarItems];
 }
 
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
+    [self.indicator stopAnimating];
+
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
 }
@@ -311,6 +318,7 @@
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
 }
+
 
 #pragma mark - Target actions
 
