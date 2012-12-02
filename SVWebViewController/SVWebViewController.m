@@ -231,10 +231,11 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
-    self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
-    self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
-    self.mobiliserBarButtonItem.enabled = YES;
+    self.backBarButtonItem.enabled = self.mainWebView.canGoBack && !self.URL.isFileURL;
+    self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward && !self.URL.isFileURL;
+    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading && !self.URL.isFileURL;
+    self.mobiliserBarButtonItem.enabled = YES && !self.URL.isFileURL;
+    self.refreshBarButtonItem.enabled = !self.URL.isFileURL;
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
