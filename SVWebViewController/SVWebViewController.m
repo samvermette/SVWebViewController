@@ -15,10 +15,14 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
+@property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
+
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
+
+@property (assign) BOOL mobiliserEnabled;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -30,6 +34,7 @@
 - (void)reloadClicked:(UIBarButtonItem *)sender;
 - (void)stopClicked:(UIBarButtonItem *)sender;
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
+- (void)mobiliserButtonClicked:(UIBarButtonItem *)sender;
 
 @end
 
@@ -39,7 +44,7 @@
 @synthesize availableActions;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, mobiliserBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -88,6 +93,19 @@
     return actionBarButtonItem;
 }
 
+- (UIBarButtonItem *)mobiliserBarButtonItem {
+    
+    if (!mobiliserBarButtonItem) {
+        UISwitch *mobileSwitch = [[UISwitch alloc] init];
+        mobileSwitch.tintColor = self.navigationController.navigationBar.tintColor;
+        mobileSwitch.onTintColor = self.navigationController.navigationBar.tintColor;
+        [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
+        mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
+    }
+    
+    return mobiliserBarButtonItem;
+}
+
 - (UIActionSheet *)pageActionSheet {
     
     if(!pageActionSheet) {
@@ -123,11 +141,22 @@
 - (id)initWithURL:(NSURL*)pageURL {
     
     if(self = [super init]) {
+        self.mobiliserEnabled = YES;
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
     
     return self;
+}
+
+-(void) loadURL:(NSURL*) url
+{
+    NSURL *pageUrl = self.URL;
+    if (self.mobiliserEnabled) {
+        NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
+        pageUrl = [NSURL URLWithString:mobilisedUrlString];
+    }
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:pageUrl]];
 }
 
 #pragma mark - View lifecycle
@@ -136,7 +165,9 @@
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:self.URL]];
+    
+    [self loadURL:self.URL];
+    
     self.view = mainWebView;
 }
 
@@ -199,7 +230,9 @@
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
-    
+    self.mobiliserBarButtonItem.enabled = YES;
+    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:self.mobiliserEnabled];
+
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
@@ -219,6 +252,8 @@
                      self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
+                     flexibleSpace,
+                     self.mobiliserBarButtonItem,
                      fixedSpace,
                      nil];
         } else {
@@ -229,6 +264,8 @@
                      self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
+                     flexibleSpace,
+                     self.mobiliserBarButtonItem,
                      flexibleSpace,
                      self.actionBarButtonItem,
                      fixedSpace,
@@ -253,6 +290,8 @@
                      flexibleSpace,
                      refreshStopBarButtonItem,
                      flexibleSpace,
+                     self.mobiliserBarButtonItem,
+                     fixedSpace,
                      nil];
         } else {
             items = [NSArray arrayWithObjects:
@@ -264,6 +303,8 @@
                      refreshStopBarButtonItem,
                      flexibleSpace,
                      self.actionBarButtonItem,
+                     flexibleSpace,
+                     self.mobiliserBarButtonItem,
                      fixedSpace,
                      nil];
         }
@@ -322,6 +363,13 @@
     else
         [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
     
+}
+
+-(void)mobiliserButtonClicked:(UISwitch *)sender
+{
+    NSLog(@"mobiliserButtonClicked");
+    self.mobiliserEnabled = !self.mobiliserEnabled;
+    [self loadURL:self.URL];
 }
 
 - (void)doneButtonClicked:(id)sender {
