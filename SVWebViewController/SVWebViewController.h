@@ -10,7 +10,7 @@
 
 #import "SVModalWebViewController.h"
 
-@interface SVWebViewController : UIViewController
+@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -18,5 +18,6 @@
 - (void)loadAddress:(NSString*)address;
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
+@property (strong, nonatomic) UIPopoverController *masterPopoverController;
 
 @end
