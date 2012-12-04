@@ -97,8 +97,8 @@
     
     if (!mobiliserBarButtonItem) {
         UISwitch *mobileSwitch = [[UISwitch alloc] init];
-        mobileSwitch.tintColor = self.navigationController.navigationBar.tintColor;
-        mobileSwitch.onTintColor = self.navigationController.navigationBar.tintColor;
+        mobileSwitch.tintColor = self.navigationController.toolbar.tintColor;
+        mobileSwitch.onTintColor = self.navigationController.toolbar.tintColor;
         [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
         mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
     }
@@ -141,11 +141,21 @@
 - (id)initWithURL:(NSURL*)pageURL {
     
     if(self = [super init]) {
+        UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+        [backButton setImage:[UIImage imageNamed:@"BackButton"]  forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(pop) forControlEvents:UIControlEventTouchUpInside];
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
     
     return self;
+}
+
+-(void) pop
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void) loadURL:(NSURL*) url
@@ -290,7 +300,6 @@
                  nil];
     }
     
-    self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
     self.toolbarItems = items;
     
 }
