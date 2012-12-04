@@ -144,7 +144,7 @@
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
             UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
             [backButton setImage:[UIImage imageNamed:@"BackButton"]  forState:UIControlStateNormal];
-            [backButton addTarget:self.navigationController action:@selector(pop) forControlEvents:UIControlEventTouchUpInside];
+            [backButton addTarget:self action:@selector(pop) forControlEvents:UIControlEventTouchUpInside];
             self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
         }
         self.URL = pageURL;
