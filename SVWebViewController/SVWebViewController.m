@@ -185,6 +185,13 @@
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
+    BOOL SVWebViewMediaPlaybackRequiresUserAction = YES;
+    BOOL SVWebViewMediaAllowsInlineMediaPlayback = NO;
+    BOOL SVWebViewMediaPlaybackAllowsAirPlay = YES;
+    mainWebView.mediaPlaybackRequiresUserAction = SVWebViewMediaPlaybackRequiresUserAction;
+    mainWebView.allowsInlineMediaPlayback = SVWebViewMediaAllowsInlineMediaPlayback;
+    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
+        mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
     
     [self loadURL:self.URL];
     
