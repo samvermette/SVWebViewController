@@ -8,13 +8,17 @@
 
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UISplitViewControllerDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *forwardBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
+@property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
+
+@property (nonatomic, strong) UIActivityIndicatorView *indicator;
+
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
@@ -30,6 +34,7 @@
 - (void)reloadClicked:(UIBarButtonItem *)sender;
 - (void)stopClicked:(UIBarButtonItem *)sender;
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
+- (void)mobiliserButtonClicked:(UIBarButtonItem *)sender;
 
 @end
 
@@ -39,7 +44,7 @@
 @synthesize availableActions;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, mobiliserBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -88,16 +93,29 @@
     return actionBarButtonItem;
 }
 
+- (UIBarButtonItem *)mobiliserBarButtonItem {
+    
+    if (!mobiliserBarButtonItem) {
+        UISwitch *mobileSwitch = [[UISwitch alloc] init];
+        mobileSwitch.tintColor = self.navigationController.toolbar.tintColor;
+        mobileSwitch.onTintColor = self.navigationController.toolbar.tintColor;
+        [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
+        mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
+    }
+    
+    return mobiliserBarButtonItem;
+}
+
 - (UIActionSheet *)pageActionSheet {
     
     if(!pageActionSheet) {
-        pageActionSheet = [[UIActionSheet alloc] 
-                        initWithTitle:self.mainWebView.request.URL.absoluteString
-                        delegate:self 
-                        cancelButtonTitle:nil   
-                        destructiveButtonTitle:nil   
-                        otherButtonTitles:nil]; 
-
+        pageActionSheet = [[UIActionSheet alloc]
+                           initWithTitle:self.mainWebView.request.URL.absoluteString
+                           delegate:self
+                           cancelButtonTitle:nil
+                           destructiveButtonTitle:nil
+                           otherButtonTitles:nil];
+        
         if((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) == SVWebViewControllerAvailableActionsCopyLink)
             [pageActionSheet addButtonWithTitle:NSLocalizedString(@"Copy Link", @"")];
         
@@ -123,11 +141,42 @@
 - (id)initWithURL:(NSURL*)pageURL {
     
     if(self = [super init]) {
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+            UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+            [backButton setImage:[UIImage imageNamed:@"BackButton"]  forState:UIControlStateNormal];
+            [backButton addTarget:self action:@selector(pop) forControlEvents:UIControlEventTouchUpInside];
+            self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        }
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
     }
     
     return self;
+}
+
+-(void) pop
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void) loadURL:(NSURL*) url
+{
+    
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
+    self.URL = url;
+    NSURL *pageUrl = url;
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    if ([userDefaults boolForKey:@"mobiliserEnabled"]) {
+        NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
+        pageUrl = [NSURL URLWithString:mobilisedUrlString];
+    }
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:pageUrl]];
+}
+
+- (void)loadAddress:(NSString*)address;
+{
+    [self loadURL:[NSURL URLWithString:address]];
 }
 
 #pragma mark - View lifecycle
@@ -136,12 +185,24 @@
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:self.URL]];
+    
+    [self loadURL:self.URL];
+    
     self.view = mainWebView;
+    
+    [self.navigationController.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+    
+    self.indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    self.indicator.hidesWhenStopped = YES;
+    [self.indicator stopAnimating];
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.indicator];
+    
+    
     [self updateToolbarItems];
 }
 
@@ -161,9 +222,9 @@
     
 	[super viewWillAppear:animated];
 	
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.navigationController setToolbarHidden:NO animated:animated];
-    }
+    self.indicator.center = self.mainWebView.center;
+    
+    [self.navigationController setToolbarHidden:NO animated:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -196,9 +257,14 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
-    self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
-    self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
+    self.backBarButtonItem.enabled = self.mainWebView.canGoBack && !self.URL.isFileURL;
+    self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward && !self.URL.isFileURL;
+    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading && !self.URL.isFileURL;
+    self.mobiliserBarButtonItem.enabled = YES && !self.URL.isFileURL;
+    self.refreshBarButtonItem.enabled = !self.URL.isFileURL;
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
     
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
@@ -206,70 +272,39 @@
     fixedSpace.width = 5.0f;
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        NSArray *items;
-        CGFloat toolbarWidth = 250.0f;
-        
-        if(self.availableActions == 0) {
-            toolbarWidth = 200.0f;
-            items = [NSArray arrayWithObjects:
-                     fixedSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.backBarButtonItem,
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     fixedSpace,
-                     nil];
-        } else {
-            items = [NSArray arrayWithObjects:
-                     fixedSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.backBarButtonItem,
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     self.actionBarButtonItem,
-                     fixedSpace,
-                     nil];
-        }
-        
-        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
-        toolbar.items = items;
-        toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
-    } 
     
-    else {
-        NSArray *items;
-        
-        if(self.availableActions == 0) {
-            items = [NSArray arrayWithObjects:
-                     flexibleSpace,
-                     self.backBarButtonItem, 
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     nil];
-        } else {
-            items = [NSArray arrayWithObjects:
-                     fixedSpace,
-                     self.backBarButtonItem, 
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.actionBarButtonItem,
-                     fixedSpace,
-                     nil];
-        }
-        
-        self.toolbarItems = items;
+    NSArray *items;
+    
+    if(self.availableActions == 0) {
+        items = [NSArray arrayWithObjects:
+                 flexibleSpace,
+                 self.backBarButtonItem,
+                 flexibleSpace,
+                 self.forwardBarButtonItem,
+                 flexibleSpace,
+                 refreshStopBarButtonItem,
+                 flexibleSpace,
+                 self.mobiliserBarButtonItem,
+                 fixedSpace,
+                 nil];
+    } else {
+        items = [NSArray arrayWithObjects:
+                 fixedSpace,
+                 self.backBarButtonItem,
+                 flexibleSpace,
+                 self.forwardBarButtonItem,
+                 flexibleSpace,
+                 refreshStopBarButtonItem,
+                 flexibleSpace,
+                 self.actionBarButtonItem,
+                 flexibleSpace,
+                 self.mobiliserBarButtonItem,
+                 fixedSpace,
+                 nil];
     }
+    
+    self.toolbarItems = items;
+    
 }
 
 #pragma mark -
@@ -277,14 +312,16 @@
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    
+    [self.indicator startAnimating];
+    
     [self updateToolbarItems];
 }
 
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
-    self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    [self.indicator stopAnimating];
     [self updateToolbarItems];
 }
 
@@ -292,6 +329,7 @@
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
 }
+
 
 #pragma mark - Target actions
 
@@ -322,6 +360,14 @@
     else
         [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
     
+}
+
+-(void)mobiliserButtonClicked:(UISwitch *)sender
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:![userDefaults boolForKey:@"mobiliserEnabled"] forKey:@"mobiliserEnabled"];
+    [userDefaults synchronize];
+    [self loadURL:self.URL];
 }
 
 - (void)doneButtonClicked:(id)sender {
@@ -379,5 +425,20 @@
     [self dismissViewControllerAnimated:YES completion:NULL];
 #endif
 }
+
+- (void)splitViewController:(UISplitViewController *)splitController willHideViewController:(UIViewController *)viewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)popoverController
+{
+    barButtonItem.title = NSLocalizedString(@"Bookmarks", nil);
+    [self.navigationItem setLeftBarButtonItem:barButtonItem animated:YES];
+    self.masterPopoverController = popoverController;
+}
+
+- (void)splitViewController:(UISplitViewController *)splitController willShowViewController:(UIViewController *)viewController invalidatingBarButtonItem:(UIBarButtonItem *)barButtonItem
+{
+    // Called when the view is shown again in the split view, invalidating the button and popover controller.
+    [self.navigationItem setLeftBarButtonItem:nil animated:YES];
+    self.masterPopoverController = nil;
+}
+
 
 @end
