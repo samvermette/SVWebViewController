@@ -143,6 +143,7 @@
 - (void)viewDidLoad {
 	[super viewDidLoad];
     [self updateToolbarItems];
+    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)viewDidUnload {
