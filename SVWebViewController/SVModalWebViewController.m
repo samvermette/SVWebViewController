@@ -39,6 +39,8 @@
     [super viewWillAppear:NO];
     
     self.navigationBar.tintColor = self.barsTintColor;
+    
+    [self.navigationController.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
