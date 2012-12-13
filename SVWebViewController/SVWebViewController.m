@@ -200,8 +200,9 @@
     
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.indicator];
     
-    
     [self updateToolbarItems];
+    
+    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)viewDidUnload {

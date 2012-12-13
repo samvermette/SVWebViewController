@@ -11,11 +11,11 @@
 @implementation SVWebSettings
 
 
-- (void)setupMediaSettings
-{
-    mainWebView.mediaPlaybackRequiresUserAction = self;
-    mainWebView.allowsInlineMediaPlayback = SVWebViewMediaAllowsInlineMediaPlayback;
-    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
-        mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
-}
+//- (void)setupMediaSettings
+//{
+//    mainWebView.mediaPlaybackRequiresUserAction = self;
+//    mainWebView.allowsInlineMediaPlayback = SVWebViewMediaAllowsInlineMediaPlayback;
+//    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
+//        mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
+//}
 @end
