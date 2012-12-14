@@ -10,7 +10,7 @@
 
 #import "SVModalWebViewController.h"
 
-@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate>
+@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate, UIGestureRecognizerDelegate>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
