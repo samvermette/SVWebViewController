@@ -230,14 +230,14 @@
 {
     NSLog(@"Swipe Right");
         //add Function
-    [self.mainWebView goForward];
+    [self.mainWebView goBack];
 }
 
 - (void)swipeLeftAction:(id)ignored
 {
     NSLog(@"Swipe Left");
         //add Function
-    [self.mainWebView goBack];
+    [self.mainWebView goForward];
 }
 
 - (void)viewDidUnload {
