@@ -35,10 +35,31 @@
     return self;
 }
 
+- (void)landscapeOrientationBugFixForiPadSimulator
+{
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    CGRect screenFrame = [UIScreen mainScreen].applicationFrame;
+    CGPoint center;
+    center.x = self.view.center.x;
+    center.y = self.view.center.y;
+    if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (screenFrame.size.width < screenFrame.size.height) {
+            screenFrame.size.width = [UIScreen mainScreen].applicationFrame.size.height;
+            screenFrame.size.height = [UIScreen mainScreen].applicationFrame.size.width;
+        }
+    }
+    self.view.superview.frame = screenFrame;
+    self.view.center = center;
+    [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:NO];
     
     self.navigationBar.tintColor = self.barsTintColor;
+    
+    [self landscapeOrientationBugFixForiPadSimulator];
 }
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
