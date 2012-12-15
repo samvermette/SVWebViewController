@@ -191,20 +191,6 @@
     self.view = mainWebView;
 }
 
-- (void)setupSwipeGestures:(UIWebView *)webView
-{
-    [super viewDidLoad];
-    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self  action:@selector(swipeRightAction:)];
-    swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
-    swipeRight.delegate = self;
-    [webView addGestureRecognizer:swipeRight];
-    
-    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeLeftAction:)];
-    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
-    swipeLeft.delegate = self;
-    [webView addGestureRecognizer:swipeLeft];
-}
-
 - (void)viewDidLoad {
 	[super viewDidLoad];
     
@@ -219,25 +205,6 @@
     [self setupSwipeGestures:self.mainWebView];
     
     [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-}
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-    return YES;
-}
-
-- (void)swipeRightAction:(id)ignored
-{
-    NSLog(@"Swipe Right");
-        //add Function
-    [self.mainWebView goBack];
-}
-
-- (void)swipeLeftAction:(id)ignored
-{
-    NSLog(@"Swipe Left");
-        //add Function
-    [self.mainWebView goForward];
 }
 
 - (void)viewDidUnload {
@@ -288,6 +255,41 @@
     [mainWebView stopLoading];
  	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     mainWebView.delegate = nil;
+}
+
+#pragma mark - Gestures
+
+- (void)setupSwipeGestures:(UIWebView *)webView
+{
+    [super viewDidLoad];
+    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self  action:@selector(swipeRightAction:)];
+    swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
+    swipeRight.delegate = self;
+    [webView addGestureRecognizer:swipeRight];
+    
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeLeftAction:)];
+    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+    swipeLeft.delegate = self;
+    [webView addGestureRecognizer:swipeLeft];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES;
+}
+
+- (void)swipeRightAction:(id)ignored
+{
+    NSLog(@"Swipe Right");
+        //add Function
+    [self.mainWebView goBack];
+}
+
+- (void)swipeLeftAction:(id)ignored
+{
+    NSLog(@"Swipe Left");
+        //add Function
+    [self.mainWebView goForward];
 }
 
 #pragma mark - Toolbar
