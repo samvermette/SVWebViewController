@@ -7,6 +7,7 @@
 //  https://github.com/samvermette/SVWebViewController
 
 #import "SVWebViewController.h"
+#import "SVWebSettings.h"
 
 @interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UISplitViewControllerDelegate>
 
@@ -202,7 +203,13 @@
     
     [self updateToolbarItems];
     
-    [self setupSwipeGestures:self.mainWebView];
+    if (nil!=self.settings) {
+        if (YES==self.settings.isSwipeBackAndForward) {
+            [self setupSwipeGestures:self.mainWebView];
+        }
+        [self setupMediaSettings];
+    }
+    
     
     [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
@@ -255,6 +262,16 @@
     [mainWebView stopLoading];
  	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     mainWebView.delegate = nil;
+}
+
+#pragma mark - Media player settings
+
+- (void)setupMediaSettings
+{
+    mainWebView.mediaPlaybackRequiresUserAction = self.settings.mediaPlaybackRequiresUserAction;
+    mainWebView.allowsInlineMediaPlayback = self.settings.mediaAllowsInlineMediaPlayback;
+    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
+        mainWebView.mediaPlaybackAllowsAirPlay = self.settings.mediaPlaybackAllowsAirPlay;
 }
 
 #pragma mark - Gestures
@@ -358,6 +375,13 @@
 
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+    
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
+            [self.settings.delegate webViewDidFinishLoad:webView];
+        }
+    }
+    
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self.indicator stopAnimating];
     [self updateToolbarItems];
@@ -366,6 +390,19 @@
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
+}
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+{
+    BOOL isStartLoad=YES;
+    
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
+            [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+        }
+    }
+    
+    return isStartLoad;
 }
 
 

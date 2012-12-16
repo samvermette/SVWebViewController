@@ -10,7 +10,9 @@
 
 #import "SVModalWebViewController.h"
 
-@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate, UIGestureRecognizerDelegate>
+@class SVWebSettings;
+
+@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate, UIGestureRecognizerDelegate, UIWebViewDelegate>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -19,5 +21,6 @@
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
+@property (strong) SVWebSettings *settings;
 
 @end
