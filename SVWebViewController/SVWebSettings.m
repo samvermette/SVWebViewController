@@ -10,12 +10,23 @@
 
 @implementation SVWebSettings
 
+- (id)init
+{
+    self = [super init];
+    
+    if (nil!=self) {
+        [self loadDefaults];
+    }
+    
+    return self;
+}
 
-//- (void)setupMediaSettings
-//{
-//    mainWebView.mediaPlaybackRequiresUserAction = self;
-//    mainWebView.allowsInlineMediaPlayback = SVWebViewMediaAllowsInlineMediaPlayback;
-//    if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
-//        mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
-//}
+- (void)loadDefaults
+{
+    self.isSwipeBackAndForward = NO;
+    self.mediaAllowsInlineMediaPlayback = YES;
+    self.mediaPlaybackAllowsAirPlay = YES;
+    self.mediaPlaybackRequiresUserAction = NO;
+}
+
 @end

@@ -13,5 +13,7 @@
 @property BOOL mediaPlaybackRequiresUserAction;
 @property BOOL mediaAllowsInlineMediaPlayback;
 @property BOOL mediaPlaybackAllowsAirPlay;
+@property BOOL isSwipeBackAndForward;
+@property (strong) id<UIWebViewDelegate> delegate;
 
 @end
