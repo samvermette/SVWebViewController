@@ -29,8 +29,20 @@
 
 - (id)initWithURL:(NSURL *)URL {
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
-    if (self = [super initWithRootViewController:self.webViewController]) {
-        self.webViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
+    self = [self initWebViewController:self.webViewController];
+    return self;
+}
+
+- (id)initWithURL:(NSURL *)URL withView:(UIWebView *)view{
+    self.webViewController = [[SVWebViewController alloc] initWithURL:URL withView:view];
+    self = [self initWebViewController:self.webViewController];
+    return self;
+}
+
+- (id)initWebViewController:(SVWebViewController *)theWebViewController
+{
+    if (self = [super initWithRootViewController:theWebViewController]) {
+        theWebViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:theWebViewController action:@selector(doneButtonClicked:)];
     }
     return self;
 }

@@ -16,6 +16,7 @@
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithURL:(NSURL*)pageURL withView:(UIWebView *)view;
 - (void)loadURL:(NSURL*)URL;
 - (void)loadAddress:(NSString*)address;
 

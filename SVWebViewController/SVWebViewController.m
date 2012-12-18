@@ -155,6 +155,16 @@
     return self;
 }
 
+- (id)initWithURL:(NSURL*)pageURL withView:(UIWebView *)view {
+    
+    if (nil!=self) {
+        self.mainWebView = view;
+        self = [self initWithURL:pageURL];
+    }
+    
+    return self;
+}
+
 -(void) pop
 {
     [self.navigationController popViewControllerAnimated:YES];
@@ -183,13 +193,16 @@
 #pragma mark - View lifecycle
 
 - (void)loadView {
-    mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    mainWebView.delegate = self;
-    mainWebView.scalesPageToFit = YES;
+    
+    if (nil==self.mainWebView) {
+        self.mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    }
+    self.mainWebView.delegate = self;
+    self.mainWebView.scalesPageToFit = YES;
     
     [self loadURL:self.URL];
     
-    self.view = mainWebView;
+    self.view = self.mainWebView;
 }
 
 - (void)viewDidLoad {
