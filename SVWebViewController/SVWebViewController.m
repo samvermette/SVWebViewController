@@ -248,6 +248,7 @@
     [self.navigationController setToolbarHidden:NO animated:animated];
     
     [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+    self.view.backgroundColor = [UIColor greenColor];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
