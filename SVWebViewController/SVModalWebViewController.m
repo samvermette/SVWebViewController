@@ -56,4 +56,32 @@
     self.webViewController.availableActions = newAvailableActions;
 }
 
+- (void)viewWillLayoutSubviews
+{
+    if (self.isApplyFullscreenExitViewBoundsSizeFix) {
+        [self landscapeOrientationBugFixForExitingFullscreenVideo];
+        self.isApplyFullscreenExitViewBoundsSizeFix=NO;
+    }
+}
+
+- (void)landscapeOrientationBugFixForExitingFullscreenVideo
+{
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    CGRect screenFrame = [UIScreen mainScreen].bounds;
+    CGPoint center;
+    center.x = self.view.center.x;
+    center.y = self.view.center.y;
+    if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (screenFrame.size.width < screenFrame.size.height) {
+            screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
+            screenFrame.size.height = [UIScreen mainScreen].bounds.size.width;
+        }
+    }
+    self.view.bounds = screenFrame;
+    self.view.center = center;
+    [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+}
+
 @end
