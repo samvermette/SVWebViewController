@@ -6,8 +6,6 @@
 //  Copyright 2012 Digimulti. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface SVWebSettings : NSObject
 
 @property BOOL mediaPlaybackRequiresUserAction;
@@ -15,6 +13,7 @@
 @property BOOL mediaPlaybackAllowsAirPlay;
 @property BOOL isSwipeBackAndForward;
 @property BOOL useAddressBarAsSearchBarWhenAddressNotFound;
+@property BOOL isUseHTTPSWhenPossible;
 @property (strong) id<UIWebViewDelegate> delegate;
 
 @end
