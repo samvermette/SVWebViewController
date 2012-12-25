@@ -27,6 +27,7 @@
     self.mediaAllowsInlineMediaPlayback = YES;
     self.mediaPlaybackAllowsAirPlay = YES;
     self.mediaPlaybackRequiresUserAction = NO;
+    self.useAddressBarAsSearchBarWhenAddressNotFound = YES;
 }
 
 @end
