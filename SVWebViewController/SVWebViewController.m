@@ -173,16 +173,16 @@
 -(void) loadURL:(NSURL*) url
 {
     
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
+//    [mainWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
     self.URL = url;
-    NSURL *pageUrl = url;
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    if ([userDefaults boolForKey:@"mobiliserEnabled"]) {
-        NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
-        pageUrl = [NSURL URLWithString:mobilisedUrlString];
-    }
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:pageUrl]];
+//    NSURL *pageUrl = url;
+//    
+//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+//    if ([userDefaults boolForKey:@"mobiliserEnabled"]) {
+//        NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
+//        pageUrl = [NSURL URLWithString:mobilisedUrlString];
+//    }
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:url]];
 }
 
 - (void)loadAddress:(NSString*)address;
@@ -380,6 +380,13 @@
 #pragma mark UIWebViewDelegate
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
+    
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
+            [self.settings.delegate webViewDidStartLoad:webView];
+        }
+    }
+    
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     
     [self.indicator startAnimating];
@@ -405,22 +412,11 @@
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
     
-    if (self.settings.useAddressBarAsSearchBarWhenAddressNotFound
-        && [self isErrorAnAddressNotFoundError:error]) {
-        [self useAddressBarAsSearchBar];
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
+            [self.settings.delegate webView:webView didFailLoadWithError:error];
+        }
     }
-}
-
-- (BOOL)isErrorAnAddressNotFoundError:(NSError *)error
-{
-    BOOL addressIsNotFound=NO;
-    
-    return addressIsNotFound;
-}
-
-- (void)useAddressBarAsSearchBar
-{
-    
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
@@ -545,6 +541,5 @@
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
 }
-
 
 @end

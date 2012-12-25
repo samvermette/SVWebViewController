@@ -23,5 +23,6 @@
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 @property (strong) SVWebSettings *settings;
+@property (nonatomic, strong, readonly) NSURL *URL;
 
 @end
