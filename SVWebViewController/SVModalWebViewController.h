@@ -18,7 +18,7 @@ enum {
 typedef NSUInteger SVWebViewControllerAvailableActions;
 
 
-@class SVWebViewController;
+@class SVWebViewController, SVWebSettings;
 
 @interface SVModalWebViewController : UINavigationController
 
@@ -26,12 +26,19 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 - (id)initWithURL:(NSURL *)URL;
 - (id)initWithURL:(NSURL *)URL withView:(UIWebView *)view;
 
+#pragma mark Set a given address in the address bar and load in the WebView.
+- (void)setAndLoadAddress:(NSURLRequest *)request;
+
+#pragma mark Update the title in the nav bar.
 - (void)updateTitle:(UIWebView *)webView;
-- (void)updateAddress:(UIWebView *)webView;
+#pragma mark Update the address in the nav bar.
+- (void)updateAddress:(NSURL *)sourceURL;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 
 @property BOOL isApplyFullscreenExitViewBoundsSizeFix;
+
+@property (nonatomic, strong) SVWebSettings *settings;
 
 @end

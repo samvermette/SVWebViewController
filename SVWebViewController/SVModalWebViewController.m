@@ -8,6 +8,7 @@
 
 #import "SVModalWebViewController.h"
 #import "SVWebViewController.h"
+#import "SVWebSettings.h"
 
 
 @interface SVWebViewController()
@@ -121,9 +122,15 @@ static const CGFloat kAddressHeight = 26.0f;
     return address;
 }
 
+- (void)setAndLoadAddress:(NSURLRequest *)request
+{
+    [self updateAddress:request.URL];
+    [self loadAddress:self event:nil];
+}
+
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
-    NSString* urlString = self.addressField.text;
+    NSString* urlString = self.addressField.text.lowercaseString;
     BOOL httpProtocolNameFound=NO;
     if (0 ==[urlString rangeOfString:@"http://"].location) {
         httpProtocolNameFound=YES;
@@ -133,13 +140,18 @@ static const CGFloat kAddressHeight = 26.0f;
     }
     
     if (NO==httpProtocolNameFound) {
-        urlString = [@"https://" stringByAppendingString:urlString];
-        self.addressField.text = urlString;
+        if (self.settings.isUseHTTPSWhenPossible) {
+            urlString = [@"https://" stringByAppendingString:urlString];
+            
+        } else {
+            urlString = [@"http://" stringByAppendingString:urlString];
+        }
     }
     
-    NSURL* url = [NSURL URLWithString:urlString];
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-    [self.webViewController.mainWebView loadRequest:request];
+    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+    [self updateAddress:request.URL];
+    
+    [self.webViewController loadURL:request.URL];
 }
 
 - (void)updateTitle:(UIWebView *)webView
@@ -148,9 +160,22 @@ static const CGFloat kAddressHeight = 26.0f;
     self.pageTitle.text = pageTitle;
 }
 
-- (void)updateAddress:(UIWebView *)webView
+- (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL
 {
-    self.addressField.text = self.webViewController.mainWebView.request.mainDocumentURL.absoluteString;
+    BOOL isJSEvaluation=NO;
+    
+    if ([sourceURL.absoluteString isEqualToString:@"about:blank"]) {
+        isJSEvaluation=YES;
+    }
+    
+    return isJSEvaluation;
+}
+
+- (void)updateAddress:(NSURL *)sourceURL
+{
+    if (NO==[self isAddressAJavascriptEvaluation:sourceURL]) {
+        self.addressField.text = sourceURL.absoluteString;
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -188,6 +213,14 @@ static const CGFloat kAddressHeight = 26.0f;
     self.view.bounds = screenFrame;
     self.view.center = center;
     [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+}
+
+
+#pragma mark - Property overrides
+- (void)setSettings:(SVWebSettings *)settings
+{
+    _settings = settings;
+    self.webViewController.settings = settings;
 }
 
 @end
