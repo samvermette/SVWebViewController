@@ -26,6 +26,8 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 - (id)initWithURL:(NSURL *)URL;
 - (id)initWithURL:(NSURL *)URL withView:(UIWebView *)view;
 
+- (void)updateTitle:(UIWebView *)webView;
+
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 
