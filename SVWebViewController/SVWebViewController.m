@@ -16,7 +16,7 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
-@property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
+//@property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 
@@ -35,7 +35,7 @@
 - (void)reloadClicked:(UIBarButtonItem *)sender;
 - (void)stopClicked:(UIBarButtonItem *)sender;
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
-- (void)mobiliserButtonClicked:(UIBarButtonItem *)sender;
+//- (void)mobiliserButtonClicked:(UIBarButtonItem *)sender;
 
 @end
 
@@ -45,7 +45,7 @@
 @synthesize availableActions;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, mobiliserBarButtonItem, pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, /*mobiliserBarButtonItem,*/ pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -94,18 +94,18 @@
     return actionBarButtonItem;
 }
 
-- (UIBarButtonItem *)mobiliserBarButtonItem {
-    
-    if (!mobiliserBarButtonItem) {
-        UISwitch *mobileSwitch = [[UISwitch alloc] init];
-        mobileSwitch.tintColor = self.navigationController.toolbar.tintColor;
-        mobileSwitch.onTintColor = self.navigationController.toolbar.tintColor;
-        [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
-        mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
-    }
-    
-    return mobiliserBarButtonItem;
-}
+//- (UIBarButtonItem *)mobiliserBarButtonItem {
+//    
+//    if (!mobiliserBarButtonItem) {
+//        UISwitch *mobileSwitch = [[UISwitch alloc] init];
+//        mobileSwitch.tintColor = self.navigationController.toolbar.tintColor;
+//        mobileSwitch.onTintColor = self.navigationController.toolbar.tintColor;
+//        [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
+//        mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
+//    }
+//    
+//    return mobiliserBarButtonItem;
+//}
 
 - (UIActionSheet *)pageActionSheet {
     
@@ -224,7 +224,7 @@
     }
     
     
-    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+//    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)viewDidUnload {
@@ -247,8 +247,8 @@
     
     [self.navigationController setToolbarHidden:NO animated:animated];
     
-    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-    self.view.backgroundColor = [UIColor greenColor];
+//    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+//    self.view.backgroundColor = [UIColor greenColor];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -329,11 +329,11 @@
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack && !self.URL.isFileURL;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward && !self.URL.isFileURL;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading && !self.URL.isFileURL;
-    self.mobiliserBarButtonItem.enabled = YES && !self.URL.isFileURL;
+//    self.mobiliserBarButtonItem.enabled = YES && !self.URL.isFileURL;
     self.refreshBarButtonItem.enabled = !self.URL.isFileURL;
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
+//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+//    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
     
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
@@ -353,8 +353,8 @@
                  flexibleSpace,
                  refreshStopBarButtonItem,
                  flexibleSpace,
-                 self.mobiliserBarButtonItem,
-                 fixedSpace,
+//                 self.mobiliserBarButtonItem,
+//                 fixedSpace,
                  nil];
     } else {
         items = [NSArray arrayWithObjects:
@@ -367,8 +367,8 @@
                  flexibleSpace,
                  self.actionBarButtonItem,
                  flexibleSpace,
-                 self.mobiliserBarButtonItem,
-                 fixedSpace,
+//                 self.mobiliserBarButtonItem,
+//                 fixedSpace,
                  nil];
     }
     
@@ -404,6 +404,23 @@
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
+    
+    if (self.settings.useAddressBarAsSearchBarWhenAddressNotFound
+        && [self isErrorAnAddressNotFoundError:error]) {
+        [self useAddressBarAsSearchBar];
+    }
+}
+
+- (BOOL)isErrorAnAddressNotFoundError:(NSError *)error
+{
+    BOOL addressIsNotFound=NO;
+    
+    return addressIsNotFound;
+}
+
+- (void)useAddressBarAsSearchBar
+{
+    
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
@@ -451,21 +468,21 @@
     
 }
 
--(void)mobiliserButtonClicked:(UISwitch *)sender
-{
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setBool:![userDefaults boolForKey:@"mobiliserEnabled"] forKey:@"mobiliserEnabled"];
-    [userDefaults synchronize];
-    [self loadURL:self.URL];
-}
+//-(void)mobiliserButtonClicked:(UISwitch *)sender
+//{
+//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+//    [userDefaults setBool:![userDefaults boolForKey:@"mobiliserEnabled"] forKey:@"mobiliserEnabled"];
+//    [userDefaults synchronize];
+//    [self loadURL:self.URL];
+//}
 
-- (void)doneButtonClicked:(id)sender {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
-    [self dismissModalViewControllerAnimated:YES];
-#else
-    [self dismissViewControllerAnimated:YES completion:NULL];
-#endif
-}
+//- (void)doneButtonClicked:(id)sender {
+//#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
+//    [self dismissModalViewControllerAnimated:YES];
+//#else
+//    [self dismissViewControllerAnimated:YES completion:NULL];
+//#endif
+//}
 
 #pragma mark -
 #pragma mark UIActionSheetDelegate
