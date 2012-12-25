@@ -68,42 +68,57 @@ static const CGFloat kAddressHeight = 26.0f;
     self.navigationBar.frame = navBarFrame;
     self.navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     
-    [self addTitleToNavBar:self.navigationBar];
-    [self addAddressField:self.addressField intoNavBar:self.navigationBar];
-    [self resizeTheWebViewToFitInTheNavBar:self.navigationBar];
+    self.pageTitle =  [self createTitleWithNavBar:self.navigationBar];
+    [self.navigationBar addSubview:self.pageTitle];
+    
+    self.addressField = [self createAddressFieldWithNavBar:self.navigationBar];
+    [self.navigationBar addSubview:self.addressField];
+    
+    [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
 }
 
-- (void)addTitleToNavBar:(UINavigationBar *)navBar
+- (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
+{
+    CGRect navFrame = self.navigationBar.bounds;
+    const NSUInteger NAVBAR_PADDING=10;
+    navFrame.size.height += NAVBAR_PADDING;
+    self.navigationBar.bounds = navFrame;
+}
+
+- (UILabel *)createTitleWithNavBar:(UINavigationBar *)navBar
 {
     CGRect labelFrame = CGRectMake(kMargin, kSpacer,
                                    navBar.bounds.size.width - 2*kMargin, kLabelHeight);
     UILabel *label = [[UILabel alloc] initWithFrame:labelFrame];
+    
     label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     label.backgroundColor = [UIColor clearColor];
     label.font = [UIFont systemFontOfSize:12];
     label.textAlignment = UITextAlignmentCenter;
     
-    self.pageTitle = label;
-    
-    [navBar addSubview:label];
+    return label;
 }
 
-- (void)addAddressField:(UITextField *)address intoNavBar:(UINavigationBar *)navBar
+- (UITextField *)createAddressFieldWithNavBar:(UINavigationBar *)navBar
 {
     const NSUInteger WIDTH_OF_NETWORK_ACTIVITY_ANIMATION=4;
     CGRect addressFrame = CGRectMake(kMargin, kSpacer*2.0 + kLabelHeight,
                                      navBar.bounds.size.width - WIDTH_OF_NETWORK_ACTIVITY_ANIMATION*kMargin, kAddressHeight);
-    address = [[UITextField alloc] initWithFrame:addressFrame];
+    UITextField *address = [[UITextField alloc] initWithFrame:addressFrame];
+    
     address.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     address.borderStyle = UITextBorderStyleRoundedRect;
     address.font = [UIFont systemFontOfSize:17];
+    
+    address.keyboardType = UIKeyboardTypeURL;
+    address.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    address.clearButtonMode = UITextFieldViewModeWhileEditing;
+    
     [address addTarget:self
                 action:@selector(loadAddress:event:)
       forControlEvents:UIControlEventEditingDidEndOnExit];
     
-    self.addressField = address;
-    
-    [navBar addSubview:address];
+    return address;
 }
 
 - (void)loadAddress:(id)sender event:(UIEvent *)event
@@ -127,18 +142,15 @@ static const CGFloat kAddressHeight = 26.0f;
     [self.webViewController.mainWebView loadRequest:request];
 }
 
-- (void)resizeTheWebViewToFitInTheNavBar:(UINavigationBar *)navBar
-{
-    CGRect webViewFrame = self.webViewController.mainWebView.frame;
-    webViewFrame.origin.y = navBar.frame.origin.y + navBar.frame.size.height;
-    webViewFrame.size.height = self.toolbar.frame.origin.y - webViewFrame.origin.y;
-    self.webViewController.mainWebView.frame = webViewFrame;
-}
-
 - (void)updateTitle:(UIWebView *)webView
 {
     NSString* pageTitle = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     self.pageTitle.text = pageTitle;
+}
+
+- (void)updateAddress:(UIWebView *)webView
+{
+    self.addressField.text = self.webViewController.mainWebView.request.mainDocumentURL.absoluteString;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
