@@ -352,9 +352,9 @@
                  self.forwardBarButtonItem,
                  flexibleSpace,
                  refreshStopBarButtonItem,
-                 flexibleSpace,
+//                 flexibleSpace, 
 //                 self.mobiliserBarButtonItem,
-//                 fixedSpace,
+                 fixedSpace,
                  nil];
     } else {
         items = [NSArray arrayWithObjects:
@@ -366,9 +366,9 @@
                  refreshStopBarButtonItem,
                  flexibleSpace,
                  self.actionBarButtonItem,
-                 flexibleSpace,
+//                 flexibleSpace,
 //                 self.mobiliserBarButtonItem,
-//                 fixedSpace,
+                 fixedSpace,
                  nil];
     }
     
