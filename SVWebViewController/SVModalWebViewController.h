@@ -29,6 +29,8 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 #pragma mark Set a given address in the address bar and load in the WebView.
 - (void)setAndLoadAddress:(NSURLRequest *)request;
 
+- (void)retrySimpleAuthentication;
+
 #pragma mark Update the title in the nav bar.
 - (void)updateTitle:(UIWebView *)webView;
 #pragma mark Update the address in the nav bar.

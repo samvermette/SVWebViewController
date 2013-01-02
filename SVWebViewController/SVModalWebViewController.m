@@ -128,6 +128,11 @@ static const CGFloat kAddressHeight = 26.0f;
     [self loadAddress:self event:nil];
 }
 
+- (void)retrySimpleAuthentication
+{
+    [self loadAddress:self event:nil];
+}
+
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
     NSString* urlString = self.addressField.text.lowercaseString;
