@@ -15,5 +15,6 @@
 @property BOOL useAddressBarAsSearchBarWhenAddressNotFound;
 @property BOOL isUseHTTPSWhenPossible;
 @property (strong) id<UIWebViewDelegate> delegate;
+@property (strong) UIBarButtonItem *customButton;
 
 @end
