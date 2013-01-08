@@ -16,7 +16,7 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
-//@property (nonatomic, strong, readonly) UIBarButtonItem *mobiliserBarButtonItem;
+@property (nonatomic, strong, readonly) UIBarButtonItem *customBarButtonItem;
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 
@@ -45,7 +45,7 @@
 @synthesize availableActions;
 
 @synthesize URL, mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, /*mobiliserBarButtonItem,*/ pageActionSheet;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, customBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -94,18 +94,14 @@
     return actionBarButtonItem;
 }
 
-//- (UIBarButtonItem *)mobiliserBarButtonItem {
-//    
-//    if (!mobiliserBarButtonItem) {
-//        UISwitch *mobileSwitch = [[UISwitch alloc] init];
-//        mobileSwitch.tintColor = self.navigationController.toolbar.tintColor;
-//        mobileSwitch.onTintColor = self.navigationController.toolbar.tintColor;
-//        [mobileSwitch addTarget:self action:@selector(mobiliserButtonClicked:) forControlEvents:UIControlEventValueChanged];
-//        mobiliserBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:mobileSwitch];
-//    }
-//    
-//    return mobiliserBarButtonItem;
-//}
+- (UIBarButtonItem *)customBarButtonItem {
+    
+    if (nil!=self.settings.customButton && !customBarButtonItem) {
+        customBarButtonItem = self.settings.customButton;
+    }
+    
+    return customBarButtonItem;
+}
 
 - (UIActionSheet *)pageActionSheet {
     
@@ -172,17 +168,9 @@
 
 -(void) loadURL:(NSURL*) url
 {
-    
-//    [mainWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
-    self.URL = url;
-//    NSURL *pageUrl = url;
-//    
-//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-//    if ([userDefaults boolForKey:@"mobiliserEnabled"]) {
-//        NSString *mobilisedUrlString = [NSString stringWithFormat:@"http://viewtext.org/api/text?url=%@&format=html", [pageUrl absoluteString]];
-//        pageUrl = [NSURL URLWithString:mobilisedUrlString];
-//    }
     [mainWebView loadRequest:[NSURLRequest requestWithURL:url]];
+    
+    self.URL = url;
 }
 
 - (void)loadAddress:(NSString*)address;
@@ -222,9 +210,6 @@
         }
         [self setupMediaSettings];
     }
-    
-    
-//    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)viewDidUnload {
@@ -246,9 +231,6 @@
     self.indicator.center = self.mainWebView.center;
     
     [self.navigationController setToolbarHidden:NO animated:animated];
-    
-//    [self.navigationController.view.superview setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-//    self.view.backgroundColor = [UIColor greenColor];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -326,50 +308,39 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
-    self.backBarButtonItem.enabled = YES;//self.mainWebView.canGoBack;// && !self.URL.isFileURL;
-    self.forwardBarButtonItem.enabled = YES;//self.mainWebView.canGoForward;// && !self.URL.isFileURL;
-    self.actionBarButtonItem.enabled = YES;//!self.mainWebView.isLoading;// && !self.URL.isFileURL;
-//    self.mobiliserBarButtonItem.enabled = YES && !self.URL.isFileURL;
-    self.refreshBarButtonItem.enabled = YES;//!self.URL.isFileURL;
+    self.backBarButtonItem.enabled = YES;//self.mainWebView.canGoBack;
+    self.forwardBarButtonItem.enabled = YES;//self.mainWebView.canGoForward;
+    self.actionBarButtonItem.enabled = YES;//!self.mainWebView.isLoading;
+    self.refreshBarButtonItem.enabled = YES;
     
 //    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 //    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
     
-    UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
+    UIBarButtonItem *refreshStopBarButtonItem = /*self.mainWebView.isLoading ? self.stopBarButtonItem :*/ self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     fixedSpace.width = 5.0f;
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     
     
-    NSArray *items;
+    NSMutableArray *items = [NSMutableArray arrayWithObjects:
+                 flexibleSpace,
+                 self.backBarButtonItem,
+                 flexibleSpace,
+                 self.forwardBarButtonItem,
+                 flexibleSpace,
+                 refreshStopBarButtonItem,
+                 fixedSpace,
+                 nil];
     
-    if(self.availableActions == 0) {
-        items = [NSArray arrayWithObjects:
-                 flexibleSpace,
-                 self.backBarButtonItem,
-                 flexibleSpace,
-                 self.forwardBarButtonItem,
-                 flexibleSpace,
-                 refreshStopBarButtonItem,
-//                 flexibleSpace, 
-//                 self.mobiliserBarButtonItem,
-                 fixedSpace,
-                 nil];
-    } else {
-        items = [NSArray arrayWithObjects:
-                 fixedSpace,
-                 self.backBarButtonItem,
-                 flexibleSpace,
-                 self.forwardBarButtonItem,
-                 flexibleSpace,
-                 refreshStopBarButtonItem,
-                 flexibleSpace,
-                 self.actionBarButtonItem,
-//                 flexibleSpace,
-//                 self.mobiliserBarButtonItem,
-                 fixedSpace,
-                 nil];
+    if(0!=self.availableActions) {
+        [items insertObject:self.actionBarButtonItem atIndex:items.count-2];
+    }
+    
+    if (nil!=self.settings.customButton) {
+        self.customBarButtonItem.enabled = YES;
+        [items insertObject:flexibleSpace atIndex:items.count-2];
+        [items insertObject:self.customBarButtonItem atIndex:items.count-2];
     }
     
     self.toolbarItems = items;
