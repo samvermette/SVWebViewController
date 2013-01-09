@@ -324,7 +324,7 @@
     
     
     NSMutableArray *items = [NSMutableArray arrayWithObjects:
-                 flexibleSpace,
+                 fixedSpace,
                  self.backBarButtonItem,
                  flexibleSpace,
                  self.forwardBarButtonItem,
@@ -334,13 +334,14 @@
                  nil];
     
     if(0!=self.availableActions) {
-        [items insertObject:self.actionBarButtonItem atIndex:items.count-2];
+        [items insertObject:flexibleSpace atIndex:items.count-1];
+        [items insertObject:self.actionBarButtonItem atIndex:items.count-1];
     }
     
     if (nil!=self.settings.customButton) {
         self.customBarButtonItem.enabled = YES;
-        [items insertObject:flexibleSpace atIndex:items.count-2];
-        [items insertObject:self.customBarButtonItem atIndex:items.count-2];
+        [items insertObject:flexibleSpace atIndex:items.count-1];
+        [items insertObject:self.customBarButtonItem atIndex:items.count-1];
     }
     
     self.toolbarItems = items;
