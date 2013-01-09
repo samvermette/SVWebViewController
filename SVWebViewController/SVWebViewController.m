@@ -35,7 +35,6 @@
 - (void)reloadClicked:(UIBarButtonItem *)sender;
 - (void)stopClicked:(UIBarButtonItem *)sender;
 - (void)actionButtonClicked:(UIBarButtonItem *)sender;
-//- (void)mobiliserButtonClicked:(UIBarButtonItem *)sender;
 
 @end
 
