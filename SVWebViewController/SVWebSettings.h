@@ -6,7 +6,7 @@
 //  Copyright 2012 Digimulti. All rights reserved.
 //
 
-@interface SVWebSettings : NSObject
+@interface SVWebSettings : NSObject <NSCoding>
 
 @property BOOL mediaPlaybackRequiresUserAction;
 @property BOOL mediaAllowsInlineMediaPlayback;
@@ -14,7 +14,10 @@
 @property BOOL isSwipeBackAndForward;
 @property BOOL useAddressBarAsSearchBarWhenAddressNotFound;
 @property BOOL isUseHTTPSWhenPossible;
-@property (strong) id<UIWebViewDelegate> delegate;
+
 @property (strong) UIBarButtonItem *customButton;
+
+@property (nonatomic) id uiWebViewClassType;
+@property (strong) id<UIWebViewDelegate> delegate;
 
 @end
