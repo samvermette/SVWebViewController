@@ -21,6 +21,7 @@
 
 @property (nonatomic, retain) UILabel* pageTitle;
 @property (nonatomic, retain) UITextField* addressField;
+@property (nonatomic, strong) SVWebSettings *settings;
 
 @end
 
@@ -34,35 +35,45 @@ static const CGFloat kAddressHeight = 26.0f;
 
 @implementation SVModalWebViewController
 
-@synthesize barsTintColor, availableActions, webViewController;
-
 #pragma mark - Initialization
-
 
 - (id)initWithAddress:(NSString*)urlString {
     return [self initWithURL:[NSURL URLWithString:urlString]];
 }
 
 - (id)initWithURL:(NSURL *)URL {
-    self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
-    self = [self initWebViewController:self.webViewController];
+    SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL];
+    self = [self initWebViewController:webViewController];
     return self;
 }
 
-- (id)initWithURL:(NSURL *)URL withView:(UIWebView *)view {
-    self.webViewController = [[SVWebViewController alloc] initWithURL:URL withView:view];
-    self = [self initWebViewController:self.webViewController];
+- (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings {
+    SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL withSettings:settings];
+    self = [self initWebViewController:webViewController];
+    
+    self.settings = settings;
+    
     return self;
 }
 
 - (id)initWebViewController:(SVWebViewController *)theWebViewController
 {
     self = [super initWithRootViewController:theWebViewController];
+    
+    if (nil!=self) {
+        self.webViewController = theWebViewController;
+        
+        self.restorationIdentifier = NSStringFromClass(self.class);
+        self.restorationClass = self.class;
+    }
+    
     return self;
 }
 
 - (void)viewDidLoad
 {
+    [super viewDidLoad];
+    
     CGRect navBarFrame = self.view.bounds;
     navBarFrame.size.height = kNavBarHeight;
     
@@ -96,6 +107,7 @@ static const CGFloat kAddressHeight = 26.0f;
     label.backgroundColor = [UIColor clearColor];
     label.font = [UIFont systemFontOfSize:12];
     label.textAlignment = UITextAlignmentCenter;
+    label.restorationIdentifier = NSStringFromClass(label.class);
     
     return label;
 }
@@ -118,6 +130,8 @@ static const CGFloat kAddressHeight = 26.0f;
     [address addTarget:self
                 action:@selector(loadAddress:event:)
       forControlEvents:UIControlEventEditingDidEndOnExit];
+    
+    address.restorationIdentifier = NSStringFromClass(address.class);
     
     return address;
 }
@@ -220,12 +234,62 @@ static const CGFloat kAddressHeight = 26.0f;
     [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
+#pragma mark - UI State Restoration
 
-#pragma mark - Property overrides
-- (void)setSettings:(SVWebSettings *)settings
++ (UIViewController *)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder
 {
-    _settings = settings;
-    self.webViewController.settings = settings;
+    SVModalWebViewController *thisViewController=nil;
+    
+    SVWebSettings *settings = [coder decodeObjectForKey:NSStringFromClass(SVWebSettings.class)];
+    thisViewController = [[SVModalWebViewController alloc] initWithURL:nil withSettings:settings];
+    thisViewController.restorationIdentifier = identifierComponents.lastObject;
+    thisViewController.restorationClass = self.class;
+    
+    return thisViewController;
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder *)coder
+{
+    [super encodeRestorableStateWithCoder:coder];
+    
+    [coder encodeObject:self.webViewController forKey:[SVModalWebViewController KEY_WEBVIEW_CONTROLLER]];
+    
+    [coder encodeObject:self.pageTitle forKey:NSStringFromClass(self.pageTitle.class)];
+    [coder encodeObject:self.pageTitle.text forKey:[SVModalWebViewController KEY_PAGE_TITLE]];
+    
+    [coder encodeObject:self.addressField forKey:NSStringFromClass(self.addressField.class)];
+    [coder encodeObject:self.addressField.text forKey:[SVModalWebViewController KEY_ADDRESS_FIELD]];
+    
+    [coder encodeObject:self.settings forKey:NSStringFromClass(SVWebSettings.class)];
+}
+
+- (void)decodeRestorableStateWithCoder:(NSCoder *)coder
+{
+    [super decodeRestorableStateWithCoder:coder];
+    
+    self.webViewController = [coder decodeObjectForKey:[SVModalWebViewController KEY_WEBVIEW_CONTROLLER]];
+    
+    self.pageTitle = [coder decodeObjectForKey:NSStringFromClass(UILabel.class)];
+    self.pageTitle.text = [coder decodeObjectForKey:[SVModalWebViewController KEY_PAGE_TITLE]];
+    
+    self.addressField = [coder decodeObjectForKey:NSStringFromClass(UITextField.class)];
+    self.addressField.text = [coder decodeObjectForKey:[SVModalWebViewController KEY_ADDRESS_FIELD]];
+}
+
+#pragma mark Key constants used by the coder.
++ (NSString *)KEY_WEBVIEW_CONTROLLER
+{
+    return @"KEY_WEBVIEW_CONTROLLER";
+}
+
++ (NSString *)KEY_PAGE_TITLE
+{
+    return @"KEY_PAGE_TITLE";
+}
+
++ (NSString *)KEY_ADDRESS_FIELD
+{
+    return @"KEY_ADDRESS_FIELD";
 }
 
 @end

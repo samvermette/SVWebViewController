@@ -20,11 +20,11 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 @class SVWebViewController, SVWebSettings;
 
-@interface SVModalWebViewController : UINavigationController
+@interface SVModalWebViewController : UINavigationController <UIViewControllerRestoration>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL *)URL;
-- (id)initWithURL:(NSURL *)URL withView:(UIWebView *)view;
+- (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings;
 
 #pragma mark Set a given address in the address bar and load in the WebView.
 - (void)setAndLoadAddress:(NSURLRequest *)request;
@@ -41,6 +41,7 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 @property BOOL isApplyFullscreenExitViewBoundsSizeFix;
 
-@property (nonatomic, strong) SVWebSettings *settings;
+@property (nonatomic, readonly, strong) SVWebSettings *settings;
+@property (nonatomic, readonly, strong) SVWebViewController *webViewController;
 
 @end
