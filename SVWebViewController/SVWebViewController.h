@@ -12,17 +12,17 @@
 
 @class SVWebSettings;
 
-@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate, UIGestureRecognizerDelegate, UIWebViewDelegate>
+@interface SVWebViewController : UIViewController <UISplitViewControllerDelegate, UIGestureRecognizerDelegate, UIWebViewDelegate, UIViewControllerRestoration>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
-- (id)initWithURL:(NSURL*)pageURL withView:(UIWebView *)view;
+- (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings;
+
 - (void)loadURL:(NSURL*)URL;
 - (void)loadAddress:(NSString*)address;
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
-@property (strong) SVWebSettings *settings;
 @property (nonatomic, strong, readonly) NSURL *URL;
 
 @end

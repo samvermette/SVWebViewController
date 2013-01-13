@@ -24,6 +24,7 @@
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, strong) SVWebSettings *settings;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -43,7 +44,7 @@
 
 @synthesize availableActions;
 
-@synthesize URL, mainWebView;
+@synthesize mainWebView;
 @synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, customBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
@@ -145,27 +146,31 @@
         }
         self.URL = pageURL;
         self.availableActions = SVWebViewControllerAvailableActionsOpenInSafari | SVWebViewControllerAvailableActionsMailLink;
+        
+        self.restorationIdentifier = NSStringFromClass(self.class);
+        self.restorationClass = self.class;
     }
     
     return self;
 }
 
-- (id)initWithURL:(NSURL*)pageURL withView:(UIWebView *)view {
+- (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings
+{
+    self = [self initWithURL:URL];
     
     if (nil!=self) {
-        self.mainWebView = view;
-        self = [self initWithURL:pageURL];
+        self.settings = settings;
     }
     
     return self;
 }
 
--(void) pop
+- (void)pop
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
 
--(void) loadURL:(NSURL*) url
+- (void)loadURL:(NSURL*)url
 {
     [mainWebView loadRequest:[NSURLRequest requestWithURL:url]];
     
@@ -180,20 +185,22 @@
 #pragma mark - View lifecycle
 
 - (void)loadView {
+    [super loadView];
     
-    if (nil==self.mainWebView) {
-        self.mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    UIWebView *uiWebView = [[self.settings.uiWebViewClassType alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    uiWebView.restorationIdentifier=NSStringFromClass(uiWebView.class);
+    [self.view addSubview:uiWebView];
+    self.mainWebView = uiWebView;
+    
+    if (nil!=self.URL) {
+        [self loadURL:self.URL];
     }
+    
     self.mainWebView.delegate = self;
     self.mainWebView.scalesPageToFit = YES;
     
-    [self loadURL:self.URL];
-    
-    self.view = self.mainWebView;
-}
-
-- (void)viewDidLoad {
-	[super viewDidLoad];
+    self.mainWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.mainWebView.autoresizesSubviews=YES;
     
     self.indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
     self.indicator.hidesWhenStopped = YES;
@@ -312,9 +319,6 @@
     self.actionBarButtonItem.enabled = YES;//!self.mainWebView.isLoading;
     self.refreshBarButtonItem.enabled = YES;
     
-//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-//    [(UISwitch*)self.mobiliserBarButtonItem.customView setOn:[userDefaults boolForKey:@"mobiliserEnabled"]];
-    
     UIBarButtonItem *refreshStopBarButtonItem = /*self.mainWebView.isLoading ? self.stopBarButtonItem :*/ self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
@@ -344,11 +348,9 @@
     }
     
     self.toolbarItems = items;
-    
 }
 
-#pragma mark -
-#pragma mark UIWebViewDelegate
+#pragma mark - UIWebViewDelegate
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     
@@ -364,7 +366,6 @@
     
     [self updateToolbarItems];
 }
-
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     
@@ -403,7 +404,6 @@
     return isStartLoad;
 }
 
-
 #pragma mark - Target actions
 
 - (void)goBackClicked:(UIBarButtonItem *)sender {
@@ -435,24 +435,7 @@
     
 }
 
-//-(void)mobiliserButtonClicked:(UISwitch *)sender
-//{
-//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-//    [userDefaults setBool:![userDefaults boolForKey:@"mobiliserEnabled"] forKey:@"mobiliserEnabled"];
-//    [userDefaults synchronize];
-//    [self loadURL:self.URL];
-//}
-
-//- (void)doneButtonClicked:(id)sender {
-//#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
-//    [self dismissModalViewControllerAnimated:YES];
-//#else
-//    [self dismissViewControllerAnimated:YES completion:NULL];
-//#endif
-//}
-
-#pragma mark -
-#pragma mark UIActionSheetDelegate
+#pragma mark - UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
@@ -511,6 +494,55 @@
     // Called when the view is shown again in the split view, invalidating the button and popover controller.
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
+}
+
+#pragma mark - UI State Restoration
+
++ (UIViewController *)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder
+{
+    SVWebViewController *thisViewController=nil;
+    
+    if ([[identifierComponents objectAtIndex:0] isEqualToString:NSStringFromClass(SVModalWebViewController.class)]) {
+        SVModalWebViewController *modalView = [coder decodeObjectForKey:NSStringFromClass(UINavigationController.class)];
+        thisViewController = modalView.webViewController;
+        
+    } else {
+        SVWebSettings *settings = [coder decodeObjectForKey:NSStringFromClass(SVWebSettings.class)];
+        thisViewController = [[SVWebViewController alloc] initWithURL:nil withSettings:settings];
+        thisViewController.restorationIdentifier = identifierComponents.lastObject;
+        thisViewController.restorationClass = self.class;
+    }
+    
+    return thisViewController;
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder *)coder
+{
+    [super encodeRestorableStateWithCoder:coder];
+    
+    [coder encodeObject:self.navigationController forKey:NSStringFromClass(UINavigationController.class)];
+    
+    [coder encodeObject:self.settings forKey:NSStringFromClass(self.settings.class)];
+    [coder encodeObject:self.URL forKey:[SVWebViewController KEY_URL]];
+    [coder encodeObject:self.mainWebView forKey:[SVWebViewController KEY_WEBVIEW]];
+}
+
+- (void)decodeRestorableStateWithCoder:(NSCoder *)coder
+{
+    [super decodeRestorableStateWithCoder:coder];
+    
+    self.URL = [coder decodeObjectForKey:[SVWebViewController KEY_URL]];
+    self.mainWebView = [coder decodeObjectForKey:[SVWebViewController KEY_WEBVIEW]];
+}
+
++ (NSString *)KEY_URL
+{
+    return @"URL";
+}
+
++ (NSString *)KEY_WEBVIEW
+{
+    return @"WEBVIEW";
 }
 
 @end
