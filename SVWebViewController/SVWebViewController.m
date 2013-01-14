@@ -187,9 +187,9 @@
 - (void)loadView {
     [super loadView];
     
-    UIWebView *uiWebView = [[self.settings.uiWebViewClassType alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    UIWebView *uiWebView = [[self.settings.uiWebViewClassType alloc] initWithFrame:self.view.frame];
     uiWebView.restorationIdentifier=NSStringFromClass(uiWebView.class);
-    [self.view addSubview:uiWebView];
+    self.view = uiWebView;
     self.mainWebView = uiWebView;
     
     if (nil!=self.URL) {
@@ -199,8 +199,6 @@
     self.mainWebView.delegate = self;
     self.mainWebView.scalesPageToFit = YES;
     
-    self.mainWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.mainWebView.autoresizesSubviews=YES;
     
     self.indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
     self.indicator.hidesWhenStopped = YES;
