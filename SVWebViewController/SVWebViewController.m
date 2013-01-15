@@ -44,8 +44,8 @@
 
 @synthesize availableActions;
 
-@synthesize mainWebView;
-@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, customBarButtonItem, pageActionSheet;
+@synthesize mainWebView, customBarButtonItem;
+@synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
 
 #pragma mark - setters and getters
 
@@ -96,8 +96,10 @@
 
 - (UIBarButtonItem *)customBarButtonItem {
     
-    if (nil!=self.settings.customButton && !customBarButtonItem) {
-        customBarButtonItem = self.settings.customButton;
+    if (nil==customBarButtonItem) {
+        if ([self.settings.delegate respondsToSelector:@selector(createCustomBarButton)]) {
+            customBarButtonItem = [self.settings.delegate performSelector:@selector(createCustomBarButton)];
+        }
     }
     
     return customBarButtonItem;
@@ -339,7 +341,7 @@
         [items insertObject:self.actionBarButtonItem atIndex:items.count-1];
     }
     
-    if (nil!=self.settings.customButton) {
+    if (nil!=self.customBarButtonItem) {
         self.customBarButtonItem.enabled = YES;
         [items insertObject:flexibleSpace atIndex:items.count-1];
         [items insertObject:self.customBarButtonItem atIndex:items.count-1];
@@ -523,6 +525,8 @@
     [coder encodeObject:self.settings forKey:NSStringFromClass(self.settings.class)];
     [coder encodeObject:self.URL forKey:[SVWebViewController KEY_URL]];
     [coder encodeObject:self.mainWebView forKey:[SVWebViewController KEY_WEBVIEW]];
+    
+//    [coder encodeObject:self.customBarButtonItem forKey:NSStringFromClass(UIBarButtonItem.class)];
 }
 
 - (void)decodeRestorableStateWithCoder:(NSCoder *)coder
@@ -531,6 +535,8 @@
     
     self.URL = [coder decodeObjectForKey:[SVWebViewController KEY_URL]];
     self.mainWebView = [coder decodeObjectForKey:[SVWebViewController KEY_WEBVIEW]];
+    
+//    self.customBarButtonItem = [coder decodeObjectForKey:NSStringFromClass(UIBarButtonItem.class)];
 }
 
 + (NSString *)KEY_URL
