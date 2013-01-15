@@ -6,6 +6,8 @@
 //  Copyright 2012 Digimulti. All rights reserved.
 //
 
+#import "SVWebViewControllerDelegate.h"
+
 @interface SVWebSettings : NSObject <NSCoding>
 
 @property BOOL mediaPlaybackRequiresUserAction;
@@ -15,9 +17,7 @@
 @property BOOL useAddressBarAsSearchBarWhenAddressNotFound;
 @property BOOL isUseHTTPSWhenPossible;
 
-@property (strong) UIBarButtonItem *customButton;
-
 @property (nonatomic) id uiWebViewClassType;
-@property (strong) id<UIWebViewDelegate> delegate;
+@property (strong) id<UIWebViewDelegate, SVWebViewControllerDelegate> delegate;
 
 @end
