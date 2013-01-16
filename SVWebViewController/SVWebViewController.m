@@ -16,7 +16,6 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *refreshBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
-@property (nonatomic, strong, readonly) UIBarButtonItem *customBarButtonItem;
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 
