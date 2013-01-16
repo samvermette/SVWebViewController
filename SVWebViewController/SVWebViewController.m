@@ -140,6 +140,8 @@
 - (id)initWithURL:(NSURL*)pageURL {
     
     if(self = [super init]) {
+        self.settings = [SVWebSettings new];
+        
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
             UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
             [backButton setImage:[UIImage imageNamed:@"BackButton"]  forState:UIControlStateNormal];

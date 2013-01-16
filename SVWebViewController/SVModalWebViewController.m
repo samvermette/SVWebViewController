@@ -42,8 +42,11 @@ static const CGFloat kAddressHeight = 26.0f;
 }
 
 - (id)initWithURL:(NSURL *)URL {
-    SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL];
+    self.settings = [SVWebSettings new];
+    SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL withSettings:self.settings];
     self = [self initWebViewController:webViewController];
+    
+    
     return self;
 }
 
@@ -233,6 +236,14 @@ static const CGFloat kAddressHeight = 26.0f;
     self.view.center = center;
     [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
+//
+//#pragma mark - View change
+//- (void)showWebBrowser
+//{
+//    [self pushViewController:self.webViewController animated:YES];
+//}
+//
+//- (void)
 
 #pragma mark - UI State Restoration
 
