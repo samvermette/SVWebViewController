@@ -219,7 +219,6 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (void)landscapeOrientationBugFixForExitingFullscreenVideo
 {
-    
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
     CGRect screenFrame = [UIScreen mainScreen].bounds;
