@@ -109,7 +109,7 @@ static const CGFloat kAddressHeight = 26.0f;
     label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     label.backgroundColor = [UIColor clearColor];
     label.font = [UIFont systemFontOfSize:12];
-    label.textAlignment = UITextAlignmentCenter;
+    label.textAlignment = NSTextAlignmentCenter;
     label.restorationIdentifier = NSStringFromClass(label.class);
     
     return label;
