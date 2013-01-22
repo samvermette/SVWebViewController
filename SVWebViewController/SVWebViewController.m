@@ -96,8 +96,8 @@
 - (UIBarButtonItem *)customBarButtonItem {
     
     if (nil==customBarButtonItem) {
-        if ([self.settings.delegate respondsToSelector:@selector(createCustomBarButton)]) {
-            customBarButtonItem = [self.settings.delegate performSelector:@selector(createCustomBarButton)];
+        if ([self.settings.delegate respondsToSelector:@selector(createCustomBarButton:)]) {
+            customBarButtonItem = [self.settings.delegate performSelector:@selector(createCustomBarButton:) withObject:self];
         }
     }
     

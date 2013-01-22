@@ -6,7 +6,9 @@
 //  Copyright 2012 Digimulti. All rights reserved.
 //
 
+@class SVWebViewController;
+
 @protocol SVWebViewControllerDelegate <NSObject>
 @optional
-- (UIBarButtonItem *)createCustomBarButton;
+- (UIBarButtonItem *)createCustomBarButton:(SVWebViewController *)webViewController;
 @end
