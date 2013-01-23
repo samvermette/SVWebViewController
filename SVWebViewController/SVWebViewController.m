@@ -315,8 +315,8 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
-    self.backBarButtonItem.enabled = YES;//self.mainWebView.canGoBack;
-    self.forwardBarButtonItem.enabled = YES;//self.mainWebView.canGoForward;
+    self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
+    self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = YES;//!self.mainWebView.isLoading;
     self.refreshBarButtonItem.enabled = YES;
     
