@@ -28,7 +28,7 @@
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
-- (void)updateToolbarItems;
+- (void)updateToolbarItems:(BOOL)isLoading;
 
 - (void)goBackClicked:(UIBarButtonItem *)sender;
 - (void)goForwardClicked:(UIBarButtonItem *)sender;
@@ -152,6 +152,11 @@
         
         self.restorationIdentifier = NSStringFromClass(self.class);
         self.restorationClass = self.class;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(progressEstimateChanged:)
+                                                     name:@"WebProgressEstimateChangedNotification"
+                                                   object:nil];
     }
     
     return self;
@@ -209,7 +214,7 @@
     
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.indicator];
     
-    [self updateToolbarItems];
+    [self updateToolbarItems:self.mainWebView.isLoading];
     
     if (nil!=self.settings) {
         if (YES==self.settings.isSwipeBackAndForward) {
@@ -313,14 +318,14 @@
 }
 
 #pragma mark - Toolbar
-
-- (void)updateToolbarItems {
+#pragma mark UIWebView.isLoading returns YES when a page has successfully finished loading via HTML5, ie a custom argument is used.
+- (void)updateToolbarItems:(BOOL)isLoading {
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
-    self.actionBarButtonItem.enabled = YES;//!self.mainWebView.isLoading;
+    self.actionBarButtonItem.enabled = NO==isLoading;
     self.refreshBarButtonItem.enabled = YES;
     
-    UIBarButtonItem *refreshStopBarButtonItem = /*self.mainWebView.isLoading ? self.stopBarButtonItem :*/ self.refreshBarButtonItem;
+    UIBarButtonItem *refreshStopBarButtonItem = isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     fixedSpace.width = 5.0f;
@@ -362,28 +367,37 @@
     }
     
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    
     [self.indicator startAnimating];
     
-    [self updateToolbarItems];
+    [self updateToolbarItems:webView.isLoading];
 }
 
+#pragma mark This delegate function is not always called when pages are loaded via html5 e.g. youtube.
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    
-    if (nil!=self.settings.delegate) {
-        if ([self.settings.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-            [self.settings.delegate webViewDidFinishLoad:webView];
+}
+NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
+- (void)progressEstimateChanged:(NSNotification *)note
+{
+    NSNumber *progress = [note.userInfo objectForKey:PROGRESS_ESTIMATE_KEY];
+    const NSInteger LOADING_COMPLETE=1;
+    if (LOADING_COMPLETE==progress.integerValue) {
+        
+        if (nil!=self.settings.delegate) {
+            if ([self.settings.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
+                [self.settings.delegate webViewDidFinishLoad:self.mainWebView];
+            }
         }
+        
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        [self.indicator stopAnimating];
+        
+        [self updateToolbarItems:NO];
     }
-    
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [self.indicator stopAnimating];
-    [self updateToolbarItems];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [self updateToolbarItems];
+    [self updateToolbarItems:self.mainWebView.isLoading];
     
     if (nil!=self.settings.delegate) {
         if ([self.settings.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
@@ -398,7 +412,7 @@
     
     if (nil!=self.settings.delegate) {
         if ([self.settings.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
-            [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+            isStartLoad = [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
         }
     }
     
@@ -421,7 +435,7 @@
 
 - (void)stopClicked:(UIBarButtonItem *)sender {
     [mainWebView stopLoading];
-	[self updateToolbarItems];
+	[self updateToolbarItems:NO];
 }
 
 - (void)actionButtonClicked:(id)sender {
