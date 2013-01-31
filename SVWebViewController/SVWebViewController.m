@@ -25,6 +25,8 @@
 @property (nonatomic, strong) NSURL *URL;
 @property (nonatomic, strong) SVWebSettings *settings;
 
+@property BOOL isFinishedLoadingPage;
+
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
@@ -156,6 +158,11 @@
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(progressEstimateChanged:)
                                                      name:@"WebProgressEstimateChangedNotification"
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(historyChanged:)
+                                                     name:@"WebHistoryItemChangedNotification"
                                                    object:nil];
     }
     
@@ -321,6 +328,7 @@
 #pragma mark UIWebView.isLoading returns YES when a page has successfully finished loading via HTML5, ie a custom argument is used.
 - (void)updateToolbarItems:(BOOL)isLoading {
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
+    BOOL isCanGoForward = self.mainWebView.canGoForward;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = NO==isLoading;
     self.refreshBarButtonItem.enabled = YES;
@@ -379,20 +387,32 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 - (void)progressEstimateChanged:(NSNotification *)note
 {
     NSNumber *progress = [note.userInfo objectForKey:PROGRESS_ESTIMATE_KEY];
+    NSLog(@"webview loaded:%@",progress);
     const NSInteger LOADING_COMPLETE=1;
-    if (LOADING_COMPLETE==progress.integerValue) {
-        
-        if (nil!=self.settings.delegate) {
-            if ([self.settings.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-                [self.settings.delegate webViewDidFinishLoad:self.mainWebView];
-            }
-        }
-        
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        [self.indicator stopAnimating];
-        
-        [self updateToolbarItems:NO];
+    if (NO==self.isFinishedLoadingPage && LOADING_COMPLETE==progress.integerValue) {
+        self.isFinishedLoadingPage=YES;
+        [self finishedLoadingPage:self.mainWebView];
     }
+}
+
+- (void)finishedLoadingPage:(UIWebView *)webView
+{
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
+            [self.settings.delegate webViewDidFinishLoad:self.mainWebView];
+        }
+    }
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [self.indicator stopAnimating];
+    
+    [self updateToolbarItems:NO];
+}
+
+#pragma mark Catch this notification to update the availability of canGoBack and canGoForward.
+- (void)historyChanged:(NSNotification *)note
+{
+    [self updateToolbarItems:self.mainWebView.isLoading];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -410,10 +430,16 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 {
     BOOL isStartLoad=YES;
     
+    self.isFinishedLoadingPage=NO;
+    
     if (nil!=self.settings.delegate) {
         if ([self.settings.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
             isStartLoad = [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
         }
+    }
+    
+    if (isStartLoad) {
+        self.URL = request.URL;
     }
     
     return isStartLoad;
