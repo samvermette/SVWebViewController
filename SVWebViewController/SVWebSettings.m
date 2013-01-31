@@ -29,7 +29,7 @@
     self.isSwipeBackAndForward = NO;
     self.mediaAllowsInlineMediaPlayback = YES;
     self.mediaPlaybackAllowsAirPlay = YES;
-    self.mediaPlaybackRequiresUserAction = NO;
+    self.mediaPlaybackRequiresUserAction = YES;
     self.useAddressBarAsSearchBarWhenAddressNotFound = YES;
     self.isUseHTTPSWhenPossible = YES;
     self.uiWebViewClassType = UIWebView.class;
