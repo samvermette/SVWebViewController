@@ -150,23 +150,42 @@ static const CGFloat kAddressHeight = 26.0f;
     [self loadAddress:self event:nil];
 }
 
-- (void)loadAddress:(id)sender event:(UIEvent *)event
+- (NSString *)getSearchQuery:(NSString *)urlString
 {
-    NSString* urlString = self.addressField.text.lowercaseString;
-    BOOL httpProtocolNameFound=NO;
-    if (0 ==[urlString rangeOfString:@"http://"].location) {
-        httpProtocolNameFound=YES;
-        
-    } else if (0 ==[urlString rangeOfString:@"https://"].location) {
-        httpProtocolNameFound=YES;
+    NSString *translatedToGoogleSearchQuery=nil;
+    
+    if (NSNotFound!=[urlString rangeOfString:@" "].location
+        || NSNotFound==[urlString rangeOfString:@"."].location) {
+        NSString *encodedSearchTerm = [urlString stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+        translatedToGoogleSearchQuery = [NSString stringWithFormat:@"https://encrypted.google.com/search?q=%@",encodedSearchTerm];
     }
     
-    if (NO==httpProtocolNameFound) {
-        if (self.settings.isUseHTTPSWhenPossible) {
-            urlString = [@"https://" stringByAppendingString:urlString];
+    return translatedToGoogleSearchQuery;
+}
+
+- (void)loadAddress:(id)sender event:(UIEvent *)event
+{
+    NSString *urlString = self.addressField.text.lowercaseString;
+    NSString *searchQuery = [self getSearchQuery:urlString];
+    if (nil!=searchQuery) {
+        urlString=searchQuery;
+        
+    } else {
+        BOOL httpProtocolNameFound=NO;
+        if (0 ==[urlString rangeOfString:@"http://"].location) {
+            httpProtocolNameFound=YES;
             
-        } else {
-            urlString = [@"http://" stringByAppendingString:urlString];
+        } else if (0 ==[urlString rangeOfString:@"https://"].location) {
+            httpProtocolNameFound=YES;
+        }
+        
+        if (NO==httpProtocolNameFound) {
+            if (self.settings.isUseHTTPSWhenPossible) {
+                urlString = [@"https://" stringByAppendingString:urlString];
+                
+            } else {
+                urlString = [@"http://" stringByAppendingString:urlString];
+            }
         }
     }
     
@@ -223,26 +242,19 @@ static const CGFloat kAddressHeight = 26.0f;
     
     CGRect screenFrame = [UIScreen mainScreen].bounds;
     CGPoint center;
-    center.x = self.view.center.x;
+    const CGFloat STATUS_BAR_HEIGHT = 20;
+    center.x = (screenFrame.size.width+STATUS_BAR_HEIGHT)/2;
     center.y = self.view.center.y;
     if (UIDeviceOrientationIsLandscape(orientation)) {
         if (screenFrame.size.width < screenFrame.size.height) {
             screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
-            screenFrame.size.height = [UIScreen mainScreen].bounds.size.width;
+            screenFrame.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
         }
     }
     self.view.bounds = screenFrame;
     self.view.center = center;
     [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
-//
-//#pragma mark - View change
-//- (void)showWebBrowser
-//{
-//    [self pushViewController:self.webViewController animated:YES];
-//}
-//
-//- (void)
 
 #pragma mark - UI State Restoration
 
