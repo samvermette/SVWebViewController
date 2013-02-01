@@ -11,4 +11,5 @@
 @protocol SVWebViewControllerDelegate <NSObject>
 @optional
 - (UIBarButtonItem *)createCustomBarButton:(SVWebViewController *)webViewController;
+- (void)historyChanged:(UIWebView *)webView;
 @end

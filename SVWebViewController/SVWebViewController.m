@@ -25,7 +25,7 @@
 @property (nonatomic, strong) NSURL *URL;
 @property (nonatomic, strong) SVWebSettings *settings;
 
-@property BOOL isFinishedLoadingPage;
+@property BOOL isLoadingPage;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -328,7 +328,6 @@
 #pragma mark UIWebView.isLoading returns YES when a page has successfully finished loading via HTML5, ie a custom argument is used.
 - (void)updateToolbarItems:(BOOL)isLoading {
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
-    BOOL isCanGoForward = self.mainWebView.canGoForward;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = NO==isLoading;
     self.refreshBarButtonItem.enabled = YES;
@@ -366,6 +365,25 @@
 
 #pragma mark - UIWebViewDelegate
 
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+{
+    BOOL isStartLoad=YES;
+    
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
+            isStartLoad = [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+        }
+    }
+    
+    if (isStartLoad) {
+        self.URL = request.URL;
+    }
+    
+    self.isLoadingPage=isStartLoad;
+    
+    return isStartLoad;
+}
+
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     
     if (nil!=self.settings.delegate) {
@@ -389,8 +407,8 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     NSNumber *progress = [note.userInfo objectForKey:PROGRESS_ESTIMATE_KEY];
     NSLog(@"webview loaded:%@",progress);
     const NSInteger LOADING_COMPLETE=1;
-    if (NO==self.isFinishedLoadingPage && LOADING_COMPLETE==progress.integerValue) {
-        self.isFinishedLoadingPage=YES;
+    if (self.isLoadingPage && LOADING_COMPLETE==progress.integerValue) {
+        self.isLoadingPage=NO;
         [self finishedLoadingPage:self.mainWebView];
     }
 }
@@ -412,7 +430,12 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 #pragma mark Catch this notification to update the availability of canGoBack and canGoForward.
 - (void)historyChanged:(NSNotification *)note
 {
-    [self updateToolbarItems:self.mainWebView.isLoading];
+    if (nil!=self.settings.delegate) {
+        if ([self.settings.delegate respondsToSelector:@selector(historyChanged:)]) {
+            [self.settings.delegate historyChanged:self.mainWebView];
+        }
+    }
+    [self updateToolbarItems:self.isLoadingPage];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -424,25 +447,6 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
             [self.settings.delegate webView:webView didFailLoadWithError:error];
         }
     }
-}
-
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
-{
-    BOOL isStartLoad=YES;
-    
-    self.isFinishedLoadingPage=NO;
-    
-    if (nil!=self.settings.delegate) {
-        if ([self.settings.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
-            isStartLoad = [self.settings.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
-        }
-    }
-    
-    if (isStartLoad) {
-        self.URL = request.URL;
-    }
-    
-    return isStartLoad;
 }
 
 #pragma mark - Target actions
