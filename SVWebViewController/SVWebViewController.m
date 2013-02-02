@@ -229,6 +229,8 @@
         }
         [self setupMediaSettings];
     }
+    
+//    self.view.restorationIdentifier = @"derp3";
 }
 
 - (void)viewDidUnload {
@@ -293,7 +295,6 @@
 
 - (void)setupSwipeGestures:(UIWebView *)webView
 {
-    [super viewDidLoad];
     UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self  action:@selector(swipeRightAction:)];
     swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
     swipeRight.delegate = self;
