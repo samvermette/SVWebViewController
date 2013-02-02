@@ -90,6 +90,8 @@ static const CGFloat kAddressHeight = 26.0f;
     [self.navigationBar addSubview:self.addressField];
     
     [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
+    
+//    self.view.restorationIdentifier = @"derp2";
 }
 
 - (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
@@ -215,7 +217,11 @@ static const CGFloat kAddressHeight = 26.0f;
 - (void)updateAddress:(NSURL *)sourceURL
 {
     if (NO==[self isAddressAJavascriptEvaluation:sourceURL]) {
-        self.addressField.text = sourceURL.absoluteString;
+        if (NO==[self.addressField.text isEqualToString:sourceURL.absoluteString]) {
+            if (NO==self.addressField.editing) {
+                self.addressField.text = sourceURL.absoluteString;
+            }
+        }
     }
 }
 
