@@ -9,6 +9,7 @@
 #import "SVModalWebViewController.h"
 #import "SVWebViewController.h"
 #import "SVWebSettings.h"
+#import "SVModalWebNavigationBar.h"
 
 
 @interface SVWebViewController()
@@ -61,9 +62,16 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (id)initWebViewController:(SVWebViewController *)theWebViewController
 {
-    self = [super initWithRootViewController:theWebViewController];
+    Class navBarClass=nil;
+    if (UIUserInterfaceIdiomPhone == UI_USER_INTERFACE_IDIOM()) {
+        navBarClass = SVModalWebNavigationBar.class;
+    }
+    
+    self = [super initWithNavigationBarClass:navBarClass toolbarClass:nil];
     
     if (nil!=self) {
+        [self pushViewController:theWebViewController animated:NO];
+        
         self.webViewController = theWebViewController;
         
         self.restorationIdentifier = NSStringFromClass(self.class);
@@ -89,18 +97,18 @@ static const CGFloat kAddressHeight = 26.0f;
     self.addressField = [self createAddressFieldWithNavBar:self.navigationBar];
     [self.navigationBar addSubview:self.addressField];
     
-    [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
+//    [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
     
 //    self.view.restorationIdentifier = @"derp2";
 }
 
-- (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
-{
-    CGRect navFrame = self.navigationBar.bounds;
-    const NSUInteger NAVBAR_PADDING=10;
-    navFrame.size.height += NAVBAR_PADDING;
-    self.navigationBar.bounds = navFrame;
-}
+//- (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
+//{
+//    CGRect navFrame = self.navigationBar.bounds;
+//    const NSUInteger NAVBAR_PADDING=10;
+//    navFrame.size.height += NAVBAR_PADDING;
+//    self.navigationBar.bounds = navFrame;
+//}
 
 - (UILabel *)createTitleWithNavBar:(UINavigationBar *)navBar
 {
