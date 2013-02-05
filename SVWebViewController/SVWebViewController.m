@@ -26,6 +26,8 @@
 @property (nonatomic, strong) SVWebSettings *settings;
 
 @property BOOL isLoadingPage;
+@property BOOL isSecureHTTPinUse;
+@property (strong) NSString *currentPageAddress;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -110,7 +112,7 @@
     
     if(!pageActionSheet) {
         pageActionSheet = [[UIActionSheet alloc]
-                           initWithTitle:self.mainWebView.request.URL.absoluteString
+                           initWithTitle:self.currentPageAddress
                            delegate:self
                            cancelButtonTitle:nil
                            destructiveButtonTitle:nil
@@ -187,6 +189,13 @@
 
 - (void)loadURL:(NSURL*)url
 {
+    if ([url.scheme isEqualToString:@"https"]) {
+        self.isSecureHTTPinUse=YES;
+        
+    } else {
+        self.isSecureHTTPinUse=NO;
+    }
+    
     [mainWebView loadRequest:[NSURLRequest requestWithURL:url]];
     
     self.URL = url;
@@ -376,7 +385,16 @@
         }
     }
     
-    if (isStartLoad) {
+    if (self.settings.isUseHTTPSWhenPossible
+    && self.isSecureHTTPinUse
+    && [request.URL.scheme isEqualToString:@"http"]) {
+        NSRange range = [request.URL.absoluteString rangeOfString:@"http://"];
+        NSString *newURLAddress = [request.URL.absoluteString stringByReplacingCharactersInRange:range withString:@"https://"];
+        [self loadAddress:newURLAddress];
+        
+        isStartLoad=NO;
+        
+    } else if (isStartLoad) {
         self.URL = request.URL;
     }
     
@@ -431,6 +449,7 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 #pragma mark Catch this notification to update the availability of canGoBack and canGoForward.
 - (void)historyChanged:(NSNotification *)note
 {
+    self.currentPageAddress = [self.mainWebView stringByEvaluatingJavaScriptFromString:@"window.location.href"];
     if (nil!=self.settings.delegate) {
         if ([self.settings.delegate respondsToSelector:@selector(historyChanged:)]) {
             [self.settings.delegate historyChanged:self.mainWebView];
@@ -487,11 +506,11 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 	NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
     
 	if([title isEqualToString:NSLocalizedString(@"Open in Safari", @"")])
-        [[UIApplication sharedApplication] openURL:self.mainWebView.request.URL];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.currentPageAddress]];
     
     if([title isEqualToString:NSLocalizedString(@"Copy Link", @"")]) {
         UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-        pasteboard.string = self.mainWebView.request.URL.absoluteString;
+        pasteboard.string = self.currentPageAddress;
     }
     
     else if([title isEqualToString:NSLocalizedString(@"Mail Link to this Page", @"")]) {
@@ -500,7 +519,7 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
         
 		mailViewController.mailComposeDelegate = self;
         [mailViewController setSubject:[self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.title"]];
-  		[mailViewController setMessageBody:self.mainWebView.request.URL.absoluteString isHTML:NO];
+  		[mailViewController setMessageBody:self.currentPageAddress isHTML:NO];
 		mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
         
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000

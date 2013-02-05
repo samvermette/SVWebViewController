@@ -29,7 +29,7 @@
 static const CGFloat kNavBarHeight = 52.0f;
 static const CGFloat kLabelHeight = 14.0f;
 static const CGFloat kMargin = 10.0f;
-static const CGFloat kSpacer = 2.0f;
+static const CGFloat kSpacer = 1.0f;//2.0f;
 static const CGFloat kLabelFontSize = 12.0f;
 static const CGFloat kAddressHeight = 26.0f;
 
@@ -97,18 +97,8 @@ static const CGFloat kAddressHeight = 26.0f;
     self.addressField = [self createAddressFieldWithNavBar:self.navigationBar];
     [self.navigationBar addSubview:self.addressField];
     
-//    [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
-    
 //    self.view.restorationIdentifier = @"derp2";
 }
-
-//- (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
-//{
-//    CGRect navFrame = self.navigationBar.bounds;
-//    const NSUInteger NAVBAR_PADDING=10;
-//    navFrame.size.height += NAVBAR_PADDING;
-//    self.navigationBar.bounds = navFrame;
-//}
 
 - (UILabel *)createTitleWithNavBar:(UINavigationBar *)navBar
 {
@@ -128,7 +118,7 @@ static const CGFloat kAddressHeight = 26.0f;
 - (UITextField *)createAddressFieldWithNavBar:(UINavigationBar *)navBar
 {
     const NSUInteger WIDTH_OF_NETWORK_ACTIVITY_ANIMATION=4;
-    CGRect addressFrame = CGRectMake(kMargin, kSpacer*2.0 + kLabelHeight,
+    CGRect addressFrame = CGRectMake(kMargin, kSpacer*1.5 + kLabelHeight,
                                      navBar.bounds.size.width - WIDTH_OF_NETWORK_ACTIVITY_ANIMATION*kMargin, kAddressHeight);
     UITextField *address = [[UITextField alloc] initWithFrame:addressFrame];
     
@@ -255,19 +245,21 @@ static const CGFloat kAddressHeight = 26.0f;
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
     CGRect screenFrame = [UIScreen mainScreen].bounds;
-    CGPoint center;
-    const CGFloat STATUS_BAR_HEIGHT = 20;
-    center.x = (screenFrame.size.width+STATUS_BAR_HEIGHT)/2;
-    center.y = self.view.center.y;
-    if (UIDeviceOrientationIsLandscape(orientation)) {
-        if (screenFrame.size.width < screenFrame.size.height) {
-            screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
-            screenFrame.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
-        }
+    if (UIDeviceOrientationIsLandscape(orientation) && screenFrame.size.width < screenFrame.size.height) {
+        CGPoint center;
+        const CGFloat STATUS_BAR_HEIGHT = 20;
+        center.x = (screenFrame.size.width+STATUS_BAR_HEIGHT)/2;
+        center.y = self.view.center.y;
+        
+        screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
+        screenFrame.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
+        
+        self.view.bounds = screenFrame;
+        self.view.center = center;
+        [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     }
-    self.view.bounds = screenFrame;
-    self.view.center = center;
-    [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+    self.addressField.hidden=NO;
+    self.pageTitle.hidden=NO;
 }
 
 #pragma mark - UI State Restoration
