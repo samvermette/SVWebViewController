@@ -234,33 +234,38 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (void)viewWillLayoutSubviews
 {
-    if (self.isApplyFullscreenExitViewBoundsSizeFix) {
-        [self landscapeOrientationBugFixForExitingFullscreenVideo];
-        self.isApplyFullscreenExitViewBoundsSizeFix=NO;
-    }
+    [self landscapeOrientationBugFixForExitingFullscreenVideoAndMailingLink:self.view];
+    [self bugFixForBarButtonsBeingRemovedByActionSheet];
 }
 
-- (void)landscapeOrientationBugFixForExitingFullscreenVideo
+- (void)bugFixForBarButtonsBeingRemovedByActionSheet
+{
+    self.webViewController.toolbarItems=0;
+    [self.webViewController updateToolbarItems:self.webViewController.isLoadingPage];
+}
+
+- (void)landscapeOrientationBugFixForExitingFullscreenVideoAndMailingLink:(UIView *)view
 {
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
-    CGRect screenFrame = [UIScreen mainScreen].bounds;
-    if (UIDeviceOrientationIsLandscape(orientation) && screenFrame.size.width < screenFrame.size.height) {
+    const CGFloat STATUS_BAR_HEIGHT = 20;
+    CGRect screenBounds = self.view.bounds;
+    if (UIDeviceOrientationIsLandscape(orientation)
+    && (screenBounds.size.height==screenBounds.size.width
+        || (screenBounds.size.height+STATUS_BAR_HEIGHT)==screenBounds.size.width)) {
         CGPoint center;
-        const CGFloat STATUS_BAR_HEIGHT = 20;
-        center.x = (screenFrame.size.width+STATUS_BAR_HEIGHT)/2;
+        center.x = (screenBounds.size.width+STATUS_BAR_HEIGHT)/2;
         center.y = self.view.center.y;
         
-        screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
-        screenFrame.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
+        screenBounds.size.width = [UIScreen mainScreen].bounds.size.height;
+        screenBounds.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
         
-        self.view.bounds = screenFrame;
+        self.view.bounds = screenBounds;
         self.view.center = center;
         [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     }
-    self.addressField.hidden=NO;
-    self.pageTitle.hidden=NO;
 }
+
 
 #pragma mark - UI State Restoration
 

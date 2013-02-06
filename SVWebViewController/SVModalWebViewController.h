@@ -44,8 +44,6 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 
-@property BOOL isApplyFullscreenExitViewBoundsSizeFix;
-
 @property (nonatomic, readonly, strong) SVWebSettings *settings;
 @property (nonatomic, readonly, strong) SVWebViewController *webViewController;
 
