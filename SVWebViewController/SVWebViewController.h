@@ -23,10 +23,13 @@
 
 - (void)updateToolbarItems:(BOOL)isLoading;
 
+- (void)dismissPageActionSheet;
+
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 @property (nonatomic, strong, readonly) NSURL *URL;
 @property (nonatomic, strong, readonly) UIBarButtonItem *customBarButtonItem;
+@property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 
 @property (readonly) BOOL isSecureHTTPinUse;
 @property (readonly) BOOL isLoadingPage;

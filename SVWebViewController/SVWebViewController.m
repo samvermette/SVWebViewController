@@ -19,8 +19,6 @@
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 
-@property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
-
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
 @property (nonatomic, strong) SVWebSettings *settings;
@@ -531,6 +529,14 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     
     pageActionSheet = nil;
 }
+
+- (void)dismissPageActionSheet
+{
+    NSInteger cancelButtonIndex = [self.pageActionSheet numberOfButtons]-1;
+    [self.pageActionSheet dismissWithClickedButtonIndex:cancelButtonIndex animated:YES];
+    pageActionSheet=nil;
+}
+
 
 #pragma mark -
 #pragma mark MFMailComposeViewControllerDelegate
