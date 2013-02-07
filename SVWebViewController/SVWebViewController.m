@@ -388,9 +388,12 @@
     && [request.URL.scheme isEqualToString:@"http"]) {
         NSRange range = [request.URL.absoluteString rangeOfString:@"http://"];
         NSString *newURLAddress = [request.URL.absoluteString stringByReplacingCharactersInRange:range withString:@"https://"];
-        [self loadAddress:newURLAddress];
         
-        isStartLoad=NO;
+        if (NO==[newURLAddress isEqualToString:self.URL.absoluteString]) {
+            [self loadAddress:newURLAddress];
+            
+            isStartLoad=NO;
+        }
         
     } else if (isStartLoad) {
         self.URL = request.URL;
