@@ -231,7 +231,12 @@ static const CGFloat kAddressHeight = 26.0f;
     && (screenBounds.size.height==screenBounds.size.width
         || (screenBounds.size.height+STATUS_BAR_HEIGHT)==screenBounds.size.width)) {
         CGPoint center;
-        center.x = (screenBounds.size.width+STATUS_BAR_HEIGHT)/2;
+        if (UIInterfaceOrientationLandscapeRight==orientation) {
+            center.x = (screenBounds.size.width-STATUS_BAR_HEIGHT)/2;
+            
+        } else {
+            center.x = (screenBounds.size.width+STATUS_BAR_HEIGHT)/2;
+        }
         center.y = self.view.center.y;
         
         screenBounds.size.width = [UIScreen mainScreen].bounds.size.height;
