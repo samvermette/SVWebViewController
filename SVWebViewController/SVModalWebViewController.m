@@ -150,25 +150,13 @@ static const CGFloat kAddressHeight = 26.0f;
     [self loadAddress:self event:nil];
 }
 
-- (NSString *)getSearchQuery:(NSString *)urlString
-{
-    NSString *translatedToGoogleSearchQuery=nil;
-    
-    if (NSNotFound!=[urlString rangeOfString:@" "].location
-        || NSNotFound==[urlString rangeOfString:@"."].location) {
-        NSString *encodedSearchTerm = [urlString stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
-        translatedToGoogleSearchQuery = [NSString stringWithFormat:@"https://encrypted.google.com/search?q=%@",encodedSearchTerm];
-    }
-    
-    return translatedToGoogleSearchQuery;
-}
-
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
     NSString *urlString = self.addressField.text.lowercaseString;
-    NSString *searchQuery = [self getSearchQuery:urlString];
-    if (nil!=searchQuery) {
-        urlString=searchQuery;
+    
+    if (NSNotFound!=[urlString rangeOfString:@" "].location
+        || NSNotFound==[urlString rangeOfString:@"."].location) {
+        urlString = [self.webViewController getSearchQuery:urlString];
         
     } else {
         BOOL httpProtocolNameFound=NO;
@@ -201,20 +189,9 @@ static const CGFloat kAddressHeight = 26.0f;
     self.pageTitle.text = pageTitle;
 }
 
-- (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL
-{
-    BOOL isJSEvaluation=NO;
-    
-    if ([sourceURL.absoluteString isEqualToString:@"about:blank"]) {
-        isJSEvaluation=YES;
-    }
-    
-    return isJSEvaluation;
-}
-
 - (void)updateAddress:(NSURL *)sourceURL
 {
-    if (NO==[self isAddressAJavascriptEvaluation:sourceURL]) {
+    if (NO==[self.webViewController isAddressAJavascriptEvaluation:sourceURL]) {
         if (NO==[self.addressField.text isEqualToString:sourceURL.absoluteString]) {
             if (NO==self.addressField.editing) {
                 self.addressField.text = sourceURL.absoluteString;
