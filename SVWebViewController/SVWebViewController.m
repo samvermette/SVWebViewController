@@ -377,7 +377,6 @@
 
 
 NSString * const kMainDocumentURL = @"kMainDocumentURL";
-
 NSString * const kHTTPSNotSupported = @"kHTTPSNotSupported";
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
@@ -417,8 +416,7 @@ NSString * const kHTTPSNotSupported = @"kHTTPSNotSupported";
                     newRequest.URL = [NSURL URLWithString:newURLAddress];
                     newRequest.mainDocumentURL = [NSURL URLWithString:newMainURLAddress];
                     
-                    const NSTimeInterval smallIntervalForTestingHTTPSSupportInSeconds = 4;
-                    newRequest.timeoutInterval = smallIntervalForTestingHTTPSSupportInSeconds;
+                    newRequest = [self requestForAttemptingHTTPS:newRequest];
                     
                     [self loadRequest:newRequest];
                     
@@ -713,6 +711,14 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     [NSURLProtocol setProperty:@"YES" forKey:kHTTPSNotSupported inRequest:redirectedRequest];
     
     return redirectedRequest;
+}
+
+- (NSMutableURLRequest *)requestForAttemptingHTTPS:(NSMutableURLRequest *)newRequest
+{
+    const NSTimeInterval smallIntervalForTestingHTTPSSupportInSeconds = 3;
+    newRequest.timeoutInterval = smallIntervalForTestingHTTPSSupportInSeconds;
+    
+    return newRequest;
 }
 
 @end

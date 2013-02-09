@@ -28,6 +28,7 @@
 
 - (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL;
 - (NSString *)getSearchQuery:(NSString *)urlString;
+- (NSMutableURLRequest *)requestForAttemptingHTTPS:(NSMutableURLRequest *)newRequest;
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
