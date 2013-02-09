@@ -18,12 +18,16 @@
 - (id)initWithURL:(NSURL*)URL;
 - (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings;
 
+- (void)loadRequest:(NSMutableURLRequest *)request;
 - (void)loadURL:(NSURL*)URL;
 - (void)loadAddress:(NSString*)address;
 
 - (void)updateToolbarItems:(BOOL)isLoading;
 
 - (void)dismissPageActionSheet;
+
+- (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL;
+- (NSString *)getSearchQuery:(NSString *)urlString;
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
