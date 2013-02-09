@@ -152,35 +152,36 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
+    NSMutableURLRequest* request;
     NSString *urlString = self.addressField.text.lowercaseString;
-    
     if (NSNotFound!=[urlString rangeOfString:@" "].location
         || NSNotFound==[urlString rangeOfString:@"."].location) {
         urlString = [self.webViewController getSearchQuery:urlString];
+        request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         
     } else {
-        BOOL httpProtocolNameFound=NO;
         if (0 ==[urlString rangeOfString:@"http://"].location) {
-            httpProtocolNameFound=YES;
+            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             
         } else if (0 ==[urlString rangeOfString:@"https://"].location) {
-            httpProtocolNameFound=YES;
-        }
-        
-        if (NO==httpProtocolNameFound) {
+            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+            
+        } else {
             if (self.settings.isUseHTTPSWhenPossible) {
                 urlString = [@"https://" stringByAppendingString:urlString];
+                request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+                request = [self.webViewController requestForAttemptingHTTPS:request];
                 
             } else {
                 urlString = [@"http://" stringByAppendingString:urlString];
+                request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             }
         }
     }
     
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
     [self updateAddress:request.URL];
     
-    [self.webViewController loadURL:request.URL];
+    [self.webViewController loadRequest:request];
 }
 
 - (void)updateTitle:(UIWebView *)webView
