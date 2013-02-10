@@ -322,15 +322,11 @@
 
 - (void)swipeRightAction:(id)ignored
 {
-    NSLog(@"Swipe Right");
-        //add Function
     [self.mainWebView goBack];
 }
 
 - (void)swipeLeftAction:(id)ignored
 {
-    NSLog(@"Swipe Left");
-        //add Function
     [self.mainWebView goForward];
 }
 
@@ -460,7 +456,6 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 - (void)progressEstimateChanged:(NSNotification *)note
 {
     NSNumber *progress = [note.userInfo objectForKey:PROGRESS_ESTIMATE_KEY];
-    NSLog(@"webview loaded:%@",progress);
     const NSInteger LOADING_COMPLETE=1;
     if (self.isLoadingPage && LOADING_COMPLETE==progress.integerValue) {
         self.isLoadingPage=NO;
