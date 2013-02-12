@@ -53,9 +53,8 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings {
     SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL withSettings:settings];
-    self = [self initWebViewController:webViewController];
-    
     self.settings = settings;
+    self = [self initWebViewController:webViewController];
     
     return self;
 }
