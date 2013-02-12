@@ -125,8 +125,12 @@ static const CGFloat kAddressHeight = 26.0f;
     address.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     address.borderStyle = UITextBorderStyleRoundedRect;
     address.font = [UIFont systemFontOfSize:17];
-    
-    address.keyboardType = UIKeyboardTypeURL;
+    if (self.settings.useAddressBarAsSearchBarWhenAddressNotFound) {
+        address.keyboardType = UIKeyboardTypeDefault;
+        
+    } else {
+        address.keyboardType = UIKeyboardTypeURL;
+    }
     address.autocapitalizationType = UITextAutocapitalizationTypeNone;
     address.clearButtonMode = UITextFieldViewModeWhileEditing;
     
