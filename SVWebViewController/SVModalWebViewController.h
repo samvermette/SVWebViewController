@@ -18,8 +18,13 @@ enum {
 
 typedef NSUInteger SVWebViewControllerAvailableActions;
 
-
 @class SVWebViewController;
+
+@protocol SVModalWebViewControllerDelegate <NSObject>
+-(void)webViewDidStartLoad:(UIWebView*)webView;
+-(void)webViewDidFinishLoad:(UIWebView*)webView;
+-(void)webView:(UIWebView*)webView didFailLoadWithError:(NSError *)error;
+@end
 
 @interface SVModalWebViewController : UINavigationController
 
@@ -28,5 +33,6 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
+@property (nonatomic, weak) id <SVModalWebViewControllerDelegate> webViewDelegate;
 
 @end

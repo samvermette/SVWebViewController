@@ -10,11 +10,18 @@
 
 #import "SVModalWebViewController.h"
 
+@protocol SVWebViewControllerDelegate <NSObject>
+-(void)webViewDidStartLoad:(UIWebView*)webView;
+-(void)webViewDidFinishLoad:(UIWebView*)webView;
+-(void)webView:(UIWebView*)webView didFailLoadWithError:(NSError *)error;
+@end
+
 @interface SVWebViewController : UIViewController
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
+@property (nonatomic, weak) id <SVWebViewControllerDelegate> delegate;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
 
 @end
