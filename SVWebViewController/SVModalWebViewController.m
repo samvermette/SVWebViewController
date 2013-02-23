@@ -96,7 +96,7 @@ static const CGFloat kAddressHeight = 26.0f;
     self.addressField = [self createAddressFieldWithNavBar:self.navigationBar];
     [self.navigationBar addSubview:self.addressField];
     
-//    self.view.restorationIdentifier = @"derp2";
+        //    self.view.restorationIdentifier = @"derp2";
 }
 
 - (UILabel *)createTitleWithNavBar:(UINavigationBar *)navBar
@@ -156,17 +156,17 @@ static const CGFloat kAddressHeight = 26.0f;
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
     NSMutableURLRequest* request;
-    NSString *urlString = self.addressField.text.lowercaseString;
+    NSString *urlString = self.addressField.text;
     if (NSNotFound!=[urlString rangeOfString:@" "].location
         || NSNotFound==[urlString rangeOfString:@"."].location) {
         urlString = [self.webViewController getSearchQuery:urlString];
         request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         
     } else {
-        if (0 ==[urlString rangeOfString:@"http://"].location) {
+        if (0 ==[urlString rangeOfString:@"http://" options:NSCaseInsensitiveSearch].location) {
             request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             
-        } else if (0 ==[urlString rangeOfString:@"https://"].location) {
+        } else if (0 ==[urlString rangeOfString:@"https://" options:NSCaseInsensitiveSearch].location) {
             request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             
         } else {
