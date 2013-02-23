@@ -29,7 +29,7 @@
 static const CGFloat kNavBarHeight = 52.0f;
 static const CGFloat kLabelHeight = 14.0f;
 static const CGFloat kMargin = 10.0f;
-static const CGFloat kSpacer = 2.0f;
+static const CGFloat kSpacer = 1.0f;//2.0f;
 static const CGFloat kLabelFontSize = 12.0f;
 static const CGFloat kAddressHeight = 26.0f;
 
@@ -53,9 +53,8 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (id)initWithURL:(NSURL *)URL withSettings:(SVWebSettings *)settings {
     SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL withSettings:settings];
-    self = [self initWebViewController:webViewController];
-    
     self.settings = settings;
+    self = [self initWebViewController:webViewController];
     
     return self;
 }
@@ -97,18 +96,8 @@ static const CGFloat kAddressHeight = 26.0f;
     self.addressField = [self createAddressFieldWithNavBar:self.navigationBar];
     [self.navigationBar addSubview:self.addressField];
     
-//    [self resizeTheNavBar:self.navigationBar toFitTheAddressField:self.addressField];
-    
-//    self.view.restorationIdentifier = @"derp2";
+        //    self.view.restorationIdentifier = @"derp2";
 }
-
-//- (void)resizeTheNavBar:(UINavigationBar *)navBar toFitTheAddressField:(UITextField *)textField
-//{
-//    CGRect navFrame = self.navigationBar.bounds;
-//    const NSUInteger NAVBAR_PADDING=10;
-//    navFrame.size.height += NAVBAR_PADDING;
-//    self.navigationBar.bounds = navFrame;
-//}
 
 - (UILabel *)createTitleWithNavBar:(UINavigationBar *)navBar
 {
@@ -128,15 +117,19 @@ static const CGFloat kAddressHeight = 26.0f;
 - (UITextField *)createAddressFieldWithNavBar:(UINavigationBar *)navBar
 {
     const NSUInteger WIDTH_OF_NETWORK_ACTIVITY_ANIMATION=4;
-    CGRect addressFrame = CGRectMake(kMargin, kSpacer*2.0 + kLabelHeight,
+    CGRect addressFrame = CGRectMake(kMargin, kSpacer*1.5 + kLabelHeight,
                                      navBar.bounds.size.width - WIDTH_OF_NETWORK_ACTIVITY_ANIMATION*kMargin, kAddressHeight);
     UITextField *address = [[UITextField alloc] initWithFrame:addressFrame];
     
     address.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     address.borderStyle = UITextBorderStyleRoundedRect;
     address.font = [UIFont systemFontOfSize:17];
-    
-    address.keyboardType = UIKeyboardTypeURL;
+    if (self.settings.useAddressBarAsSearchBarWhenAddressNotFound) {
+        address.keyboardType = UIKeyboardTypeDefault;
+        
+    } else {
+        address.keyboardType = UIKeyboardTypeURL;
+    }
     address.autocapitalizationType = UITextAutocapitalizationTypeNone;
     address.clearButtonMode = UITextFieldViewModeWhileEditing;
     
@@ -160,49 +153,38 @@ static const CGFloat kAddressHeight = 26.0f;
     [self loadAddress:self event:nil];
 }
 
-- (NSString *)getSearchQuery:(NSString *)urlString
-{
-    NSString *translatedToGoogleSearchQuery=nil;
-    
-    if (NSNotFound!=[urlString rangeOfString:@" "].location
-        || NSNotFound==[urlString rangeOfString:@"."].location) {
-        NSString *encodedSearchTerm = [urlString stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
-        translatedToGoogleSearchQuery = [NSString stringWithFormat:@"https://encrypted.google.com/search?q=%@",encodedSearchTerm];
-    }
-    
-    return translatedToGoogleSearchQuery;
-}
-
 - (void)loadAddress:(id)sender event:(UIEvent *)event
 {
-    NSString *urlString = self.addressField.text.lowercaseString;
-    NSString *searchQuery = [self getSearchQuery:urlString];
-    if (nil!=searchQuery) {
-        urlString=searchQuery;
+    NSMutableURLRequest* request;
+    NSString *urlString = self.addressField.text;
+    if (NSNotFound!=[urlString rangeOfString:@" "].location
+        || NSNotFound==[urlString rangeOfString:@"."].location) {
+        urlString = [self.webViewController getSearchQuery:urlString];
+        request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         
     } else {
-        BOOL httpProtocolNameFound=NO;
-        if (0 ==[urlString rangeOfString:@"http://"].location) {
-            httpProtocolNameFound=YES;
+        if (0 ==[urlString rangeOfString:@"http://" options:NSCaseInsensitiveSearch].location) {
+            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             
-        } else if (0 ==[urlString rangeOfString:@"https://"].location) {
-            httpProtocolNameFound=YES;
-        }
-        
-        if (NO==httpProtocolNameFound) {
+        } else if (0 ==[urlString rangeOfString:@"https://" options:NSCaseInsensitiveSearch].location) {
+            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+            
+        } else {
             if (self.settings.isUseHTTPSWhenPossible) {
                 urlString = [@"https://" stringByAppendingString:urlString];
+                request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+                request = [self.webViewController requestForAttemptingHTTPS:request];
                 
             } else {
                 urlString = [@"http://" stringByAppendingString:urlString];
+                request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
             }
         }
     }
     
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
     [self updateAddress:request.URL];
     
-    [self.webViewController loadURL:request.URL];
+    [self.webViewController loadRequest:request];
 }
 
 - (void)updateTitle:(UIWebView *)webView
@@ -211,20 +193,9 @@ static const CGFloat kAddressHeight = 26.0f;
     self.pageTitle.text = pageTitle;
 }
 
-- (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL
-{
-    BOOL isJSEvaluation=NO;
-    
-    if ([sourceURL.absoluteString isEqualToString:@"about:blank"]) {
-        isJSEvaluation=YES;
-    }
-    
-    return isJSEvaluation;
-}
-
 - (void)updateAddress:(NSURL *)sourceURL
 {
-    if (NO==[self isAddressAJavascriptEvaluation:sourceURL]) {
+    if (NO==[self.webViewController isAddressAJavascriptEvaluation:sourceURL]) {
         if (NO==[self.addressField.text isEqualToString:sourceURL.absoluteString]) {
             if (NO==self.addressField.editing) {
                 self.addressField.text = sourceURL.absoluteString;
@@ -244,31 +215,43 @@ static const CGFloat kAddressHeight = 26.0f;
 
 - (void)viewWillLayoutSubviews
 {
-    if (self.isApplyFullscreenExitViewBoundsSizeFix) {
-        [self landscapeOrientationBugFixForExitingFullscreenVideo];
-        self.isApplyFullscreenExitViewBoundsSizeFix=NO;
-    }
+    [self landscapeOrientationBugFixForExitingFullscreenVideoAndMailingLink:self.view];
+    [self bugFixForBarButtonsBeingRemovedByActionSheet];
 }
 
-- (void)landscapeOrientationBugFixForExitingFullscreenVideo
+- (void)bugFixForBarButtonsBeingRemovedByActionSheet
+{
+    self.webViewController.toolbarItems=0;
+    [self.webViewController updateToolbarItems:self.webViewController.isLoadingPage];
+}
+
+- (void)landscapeOrientationBugFixForExitingFullscreenVideoAndMailingLink:(UIView *)view
 {
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
-    CGRect screenFrame = [UIScreen mainScreen].bounds;
-    CGPoint center;
     const CGFloat STATUS_BAR_HEIGHT = 20;
-    center.x = (screenFrame.size.width+STATUS_BAR_HEIGHT)/2;
-    center.y = self.view.center.y;
-    if (UIDeviceOrientationIsLandscape(orientation)) {
-        if (screenFrame.size.width < screenFrame.size.height) {
-            screenFrame.size.width = [UIScreen mainScreen].bounds.size.height;
-            screenFrame.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
+    CGRect screenBounds = self.view.bounds;
+    if (UIDeviceOrientationIsLandscape(orientation)
+    && (screenBounds.size.height==screenBounds.size.width
+        || (screenBounds.size.height+STATUS_BAR_HEIGHT)==screenBounds.size.width)) {
+        CGPoint center;
+        if (UIInterfaceOrientationLandscapeRight==orientation) {
+            center.x = (screenBounds.size.width-STATUS_BAR_HEIGHT)/2;
+            
+        } else {
+            center.x = (screenBounds.size.width+STATUS_BAR_HEIGHT)/2;
         }
+        center.y = self.view.center.y;
+        
+        screenBounds.size.width = [UIScreen mainScreen].bounds.size.height;
+        screenBounds.size.height = [UIScreen mainScreen].bounds.size.width-STATUS_BAR_HEIGHT;
+        
+        self.view.bounds = screenBounds;
+        self.view.center = center;
+        [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     }
-    self.view.bounds = screenFrame;
-    self.view.center = center;
-    [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
+
 
 #pragma mark - UI State Restoration
 

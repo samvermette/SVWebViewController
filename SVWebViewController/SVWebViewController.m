@@ -19,13 +19,12 @@
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 
-@property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
-
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
 @property (nonatomic, strong) SVWebSettings *settings;
 
 @property BOOL isLoadingPage;
+@property (strong) NSString *currentPageAddress;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -110,7 +109,7 @@
     
     if(!pageActionSheet) {
         pageActionSheet = [[UIActionSheet alloc]
-                           initWithTitle:self.mainWebView.request.URL.absoluteString
+                           initWithTitle:self.currentPageAddress
                            delegate:self
                            cancelButtonTitle:nil
                            destructiveButtonTitle:nil
@@ -185,11 +184,21 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)loadRequest:(NSMutableURLRequest *)request
+{
+    [NSURLProtocol setProperty:@"YES" forKey:kMainDocumentURL inRequest:request];
+    if ([request.URL.scheme isEqualToString:@"http"]) {
+        [NSURLProtocol setProperty:@"YES" forKey:kHTTPSNotSupported inRequest:request];
+    }
+    
+    [mainWebView loadRequest:request];
+    
+    self.URL = request.URL;
+}
+
 - (void)loadURL:(NSURL*)url
 {
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:url]];
-    
-    self.URL = url;
+    [self loadRequest:[NSMutableURLRequest requestWithURL:url]];
 }
 
 - (void)loadAddress:(NSString*)address;
@@ -313,15 +322,11 @@
 
 - (void)swipeRightAction:(id)ignored
 {
-    NSLog(@"Swipe Right");
-        //add Function
     [self.mainWebView goBack];
 }
 
 - (void)swipeLeftAction:(id)ignored
 {
-    NSLog(@"Swipe Left");
-        //add Function
     [self.mainWebView goForward];
 }
 
@@ -366,6 +371,10 @@
 
 #pragma mark - UIWebViewDelegate
 
+
+NSString * const kMainDocumentURL = @"kMainDocumentURL";
+NSString * const kHTTPSNotSupported = @"kHTTPSNotSupported";
+
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     BOOL isStartLoad=YES;
@@ -376,8 +385,49 @@
         }
     }
     
+    if (UIWebViewNavigationTypeLinkClicked==navigationType) {
+        NSMutableURLRequest *modifiedRequest = (NSMutableURLRequest *)request;
+        [NSURLProtocol setProperty:@"YES" forKey:kMainDocumentURL inRequest:modifiedRequest];
+    }
+    
     if (isStartLoad) {
-        self.URL = request.URL;
+        BOOL isSecureSupportUnknownforNavType = (UIWebViewNavigationTypeLinkClicked == navigationType || UIWebViewNavigationTypeOther==navigationType);
+        
+        if (self.settings.isUseHTTPSWhenPossible
+            && [request.URL.scheme isEqualToString:@"http"]
+            && isSecureSupportUnknownforNavType
+            && nil==[request.allHTTPHeaderFields objectForKey:@"Referer"]
+            ) {
+            NSString *isHTTPSNotSupported = [NSURLProtocol propertyForKey:kHTTPSNotSupported inRequest:request];
+            NSString *isMainDocumentURL = [NSURLProtocol propertyForKey:kMainDocumentURL inRequest:request];
+            if (nil==isHTTPSNotSupported && isMainDocumentURL) {
+                NSRange range = [request.URL.absoluteString rangeOfString:@"http://"];
+                NSString *newURLAddress = [request.URL.absoluteString stringByReplacingCharactersInRange:range withString:@"https://"];
+                
+                if (NO==[newURLAddress isEqualToString:self.URL.absoluteString]) {
+                    NSRange range = [request.mainDocumentURL.absoluteString rangeOfString:@"http://"];
+                    NSString *newMainURLAddress = [request.mainDocumentURL.absoluteString stringByReplacingCharactersInRange:range withString:@"https://"];
+                    
+                    NSMutableURLRequest *newRequest = (NSMutableURLRequest *)request;
+                    newRequest.URL = [NSURL URLWithString:newURLAddress];
+                    newRequest.mainDocumentURL = [NSURL URLWithString:newMainURLAddress];
+                    
+                    newRequest = [self requestForAttemptingHTTPS:newRequest];
+                    
+                    [self loadRequest:newRequest];
+                    
+                    isStartLoad=NO;
+                }
+            }
+            
+        }
+    }
+    
+    if (isStartLoad) {
+        
+        if (NO==[self isAddressAJavascriptEvaluation:request.URL]) {
+            self.URL = request.URL;
+        }
     }
     
     self.isLoadingPage=isStartLoad;
@@ -406,7 +456,6 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 - (void)progressEstimateChanged:(NSNotification *)note
 {
     NSNumber *progress = [note.userInfo objectForKey:PROGRESS_ESTIMATE_KEY];
-    NSLog(@"webview loaded:%@",progress);
     const NSInteger LOADING_COMPLETE=1;
     if (self.isLoadingPage && LOADING_COMPLETE==progress.integerValue) {
         self.isLoadingPage=NO;
@@ -431,6 +480,7 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 #pragma mark Catch this notification to update the availability of canGoBack and canGoForward.
 - (void)historyChanged:(NSNotification *)note
 {
+    self.currentPageAddress = [self.mainWebView stringByEvaluatingJavaScriptFromString:@"window.location.href"];
     if (nil!=self.settings.delegate) {
         if ([self.settings.delegate respondsToSelector:@selector(historyChanged:)]) {
             [self.settings.delegate historyChanged:self.mainWebView];
@@ -443,12 +493,30 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems:self.mainWebView.isLoading];
     
-    if (nil!=self.settings.delegate) {
+    BOOL quietlyHandledError=NO;
+    
+    const NSInteger REQUEST_TIMED_OUT = -1001;
+    const NSInteger COULDNT_CONNECT_TO_THE_SERVER_CODE=-1004;
+    switch (error.code) {
+        case COULDNT_CONNECT_TO_THE_SERVER_CODE:
+        case REQUEST_TIMED_OUT:
+        {
+        if (self.settings.isUseHTTPSWhenPossible) {
+            NSMutableURLRequest *httpRequest = [self convertHTTPStoHTTP:self.URL];
+            [self loadRequest:httpRequest];
+            quietlyHandledError=YES;
+        }
+        }break;
+    }
+    
+    if (nil!=self.settings.delegate
+    && NO==quietlyHandledError) {
         if ([self.settings.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
             [self.settings.delegate webView:webView didFailLoadWithError:error];
         }
     }
 }
+
 
 #pragma mark - Target actions
 
@@ -481,17 +549,18 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     
 }
 
+
 #pragma mark - UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
     
 	if([title isEqualToString:NSLocalizedString(@"Open in Safari", @"")])
-        [[UIApplication sharedApplication] openURL:self.mainWebView.request.URL];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.currentPageAddress]];
     
     if([title isEqualToString:NSLocalizedString(@"Copy Link", @"")]) {
         UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-        pasteboard.string = self.mainWebView.request.URL.absoluteString;
+        pasteboard.string = self.currentPageAddress;
     }
     
     else if([title isEqualToString:NSLocalizedString(@"Mail Link to this Page", @"")]) {
@@ -500,7 +569,7 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
         
 		mailViewController.mailComposeDelegate = self;
         [mailViewController setSubject:[self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.title"]];
-  		[mailViewController setMessageBody:self.mainWebView.request.URL.absoluteString isHTML:NO];
+  		[mailViewController setMessageBody:self.currentPageAddress isHTML:NO];
 		mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
         
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
@@ -512,6 +581,14 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     
     pageActionSheet = nil;
 }
+
+- (void)dismissPageActionSheet
+{
+    NSInteger cancelButtonIndex = [self.pageActionSheet numberOfButtons]-1;
+    [self.pageActionSheet dismissWithClickedButtonIndex:cancelButtonIndex animated:YES];
+    pageActionSheet=nil;
+}
+
 
 #pragma mark -
 #pragma mark MFMailComposeViewControllerDelegate
@@ -542,6 +619,7 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     self.masterPopoverController = nil;
 }
 
+
 #pragma mark - UI State Restoration
 
 + (UIViewController *)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder
@@ -571,8 +649,6 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     [coder encodeObject:self.settings forKey:NSStringFromClass(self.settings.class)];
     [coder encodeObject:self.URL forKey:[SVWebViewController KEY_URL]];
     [coder encodeObject:self.mainWebView forKey:[SVWebViewController KEY_WEBVIEW]];
-    
-//    [coder encodeObject:self.customBarButtonItem forKey:NSStringFromClass(UIBarButtonItem.class)];
 }
 
 - (void)decodeRestorableStateWithCoder:(NSCoder *)coder
@@ -581,8 +657,6 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
     
     self.URL = [coder decodeObjectForKey:[SVWebViewController KEY_URL]];
     self.mainWebView = [coder decodeObjectForKey:[SVWebViewController KEY_WEBVIEW]];
-    
-//    self.customBarButtonItem = [coder decodeObjectForKey:NSStringFromClass(UIBarButtonItem.class)];
 }
 
 + (NSString *)KEY_URL
@@ -593,6 +667,53 @@ NSString * const PROGRESS_ESTIMATE_KEY=@"WebProgressEstimatedProgressKey";
 + (NSString *)KEY_WEBVIEW
 {
     return @"WEBVIEW";
+}
+
+
+#pragma mark - Misc functions
+
+- (BOOL)isAddressAJavascriptEvaluation:(NSURL *)sourceURL
+{
+    BOOL isJSEvaluation=NO;
+    
+    if ([sourceURL.absoluteString isEqualToString:@"about:blank"]) {
+        isJSEvaluation=YES;
+    }
+    
+    return isJSEvaluation;
+}
+
+- (NSString *)getSearchQuery:(NSString *)urlString
+{
+    NSString *translatedToGoogleSearchQuery=nil;
+    
+    NSString *encodedSearchTerm = [urlString stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+    translatedToGoogleSearchQuery = [NSString stringWithFormat:@"https://encrypted.google.com/search?q=%@",encodedSearchTerm];
+    
+    return translatedToGoogleSearchQuery;
+}
+
+- (NSMutableURLRequest *)convertHTTPStoHTTP:(NSURL *)url
+{
+    NSMutableURLRequest *redirectedRequest;
+    
+    NSString *originalRequestString = url.absoluteString;
+    
+    NSString *newRequestString = [originalRequestString stringByReplacingOccurrencesOfString:@"https://" withString:@"http://"];
+    
+    redirectedRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:newRequestString]];
+    
+    [NSURLProtocol setProperty:@"YES" forKey:kHTTPSNotSupported inRequest:redirectedRequest];
+    
+    return redirectedRequest;
+}
+
+- (NSMutableURLRequest *)requestForAttemptingHTTPS:(NSMutableURLRequest *)newRequest
+{
+    const NSTimeInterval smallIntervalForTestingHTTPSSupportInSeconds = 3;
+    newRequest.timeoutInterval = smallIntervalForTestingHTTPSSupportInSeconds;
+    
+    return newRequest;
 }
 
 @end
