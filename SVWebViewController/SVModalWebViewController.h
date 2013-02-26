@@ -36,5 +36,6 @@
 @end
 
 extern NSString *const SVWebViewControllerActivityTypeSafari;
+extern NSString *const SVWebViewControllerActivityTypeChrome;
 extern NSString *const SVWebViewControllerActivityTypeMail;
 extern NSString *const SVWebViewControllerActivityTypeCopyToPasteboard;

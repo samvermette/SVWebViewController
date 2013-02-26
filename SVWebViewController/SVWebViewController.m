@@ -24,6 +24,15 @@ BOOL SVWebViewMediaPlaybackAllowsAirPlay = YES;
 
 NSString *const SVWebViewControllerActivityTypeSafari = @"activity.Safari";
 
+@interface SVWebViewControllerActivityChrome : SVWebViewControllerActivity
+
++(BOOL)available;
+
+@end
+
+NSString *const SVWebViewControllerActivityTypeChrome = @"activity.Chrome";
+
+
 @interface SVWebViewControllerActivityCopyToPasteboard : SVWebViewControllerActivity
 @end
 
@@ -56,6 +65,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (void)loadURL:(NSURL*)URL;
 
 - (void)updateToolbarItems;
 
@@ -72,6 +82,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 - (void)activityDidFinish:(SVWebViewControllerActivity*)activity;
 
 @end
+
 
 @implementation SVWebViewController
 
@@ -132,6 +143,9 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     if(self.applicationActivities.count > 0)
         return YES;
     NSMutableArray *remainingBuiltinActivityTypes = [NSMutableArray arrayWithObjects:SVWebViewControllerActivityTypeSafari, SVWebViewControllerActivityTypeMail, SVWebViewControllerActivityTypeCopyToPasteboard, nil];
+    if([SVWebViewControllerActivityChrome available])
+       [remainingBuiltinActivityTypes addObject:SVWebViewControllerActivityTypeChrome];
+    
     [remainingBuiltinActivityTypes removeObjectsInArray:self.excludedActivityTypes];
     return remainingBuiltinActivityTypes.count > 0;
 }
@@ -141,6 +155,8 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         NSMutableArray* activities = [NSMutableArray array];
         if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeSafari])
            [activities addObject:[SVWebViewControllerActivitySafari new]];
+        if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeChrome] && [SVWebViewControllerActivityChrome available])
+            [activities addObject:[SVWebViewControllerActivityChrome new]];
         if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeMail])
             [activities addObject:[SVWebViewControllerActivityMail new]];
         if(![self.excludedActivityTypes containsObject:SVWebViewControllerActivityTypeCopyToPasteboard])
@@ -154,6 +170,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 }
 
 - (UIActionSheet *)pageActionSheet {
+    
     if(!pageActionSheet) {
         pageActionSheet = [[UIActionSheet alloc] 
                         initWithTitle:self.mainWebView.request.URL.absoluteString
@@ -197,6 +214,10 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     return self;
 }
 
+- (void)loadURL:(NSURL *)pageURL {
+    [mainWebView loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
 #pragma mark - View lifecycle
 
 - (void)loadView {
@@ -208,7 +229,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     if([mainWebView respondsToSelector:@selector(mediaPlaybackAllowsAirPlay)])
         mainWebView.mediaPlaybackAllowsAirPlay = SVWebViewMediaPlaybackAllowsAirPlay;
     self.webViewScrollView.delegate = self;
-    [mainWebView loadRequest:[NSURLRequest requestWithURL:self.URL]];
+    [self loadURL:self.URL];
     self.view = mainWebView;
 }
 
@@ -317,6 +338,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
+				toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
     } 
@@ -348,6 +370,8 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
                      nil];
         }
         
+				self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+				self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
 }
@@ -434,7 +458,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     pageActionSheet = nil;
     presentedActivities = nil;
 }
-
+    
 - (void)activityDidFinish:(SVWebViewControllerActivity*)activity {
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
     [self dismissModalViewControllerAnimated:YES];
@@ -451,12 +475,12 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 -(UIScrollView *)webViewScrollView {
     return [self.mainWebView.subviews lastObject];
 }
-
+    
 -(void)setAlwaysShowNavigationBar:(BOOL)value {
     alwaysShowNavigationBar = value;
     [self updateWebViewScrollViewContentInset];
-}
-
+    }
+    
 -(void)updateWebViewScrollViewContentInset {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         if(self.navigationController.navigationBar) {
@@ -468,7 +492,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         self.mainWebView.frame = CGRectMake(0, -self.webViewScrollView.contentInset.top, self.mainWebView.superview.frame.size.width, self.mainWebView.superview.frame.size.height+self.webViewScrollView.contentInset.top);
     }
 }
-
+        
 - (void)updateNavigationBarPositionWithAnimationAndReset:(BOOL)animationAndReset {
     if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && !self.alwaysShowNavigationBar) {
         if(animationAndReset) {
@@ -484,9 +508,9 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
             [UIView commitAnimations];
         }
     }
-    
+        
 }
-
+        
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if(self.mainWebView.loading && -scrollView.contentOffset.y < scrollView.contentInset.top) {
         scrollView.contentOffset = CGPointMake(0, -scrollView.contentInset.top);
@@ -495,7 +519,7 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
         scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(MAX(scrollView.contentInset.top, - scrollView.contentOffset.y), 0, 0, 0);
     } else {
         scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-    }
+	}
     
     [self updateNavigationBarPositionWithAnimationAndReset:NO];
 }
@@ -547,6 +571,45 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 
 @end
 
+@implementation SVWebViewControllerActivityChrome
+
++(BOOL)available {
+    return [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"googlechrome:/"]];
+}
+
+-(NSString *)activityTitle {
+    return NSLocalizedString(@"Open in Chrome", @"");
+}
+
+-(void)performActivity {
+    NSURL *inputURL = self.webView.request.URL;
+    NSString *scheme = inputURL.scheme;
+    
+    NSString *chromeScheme = nil;
+    if ([scheme isEqualToString:@"http"]) {
+        chromeScheme = @"googlechrome";
+    } else if ([scheme isEqualToString:@"https"]) {
+        chromeScheme = @"googlechromes";
+    }
+    
+    BOOL succeeded = NO;
+    if (chromeScheme) {
+        NSString *absoluteString = [inputURL absoluteString];
+        NSRange rangeForScheme = [absoluteString rangeOfString:@":"];
+        NSString *urlNoScheme =
+        [absoluteString substringFromIndex:rangeForScheme.location];
+        NSString *chromeURLString =
+        [chromeScheme stringByAppendingString:urlNoScheme];
+        NSURL *chromeURL = [NSURL URLWithString:chromeURLString];
+        
+        succeeded = [[UIApplication sharedApplication] openURL:chromeURL];
+    }
+    
+    [self activityDidFinish:succeeded];
+}
+
+@end
+
 @implementation SVWebViewControllerActivityMail
 
 -(NSString *)activityTitle {
@@ -564,9 +627,9 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
     return mailViewController;
 }
 
-- (void)mailComposeController:(MFMailComposeViewController *)controller 
-          didFinishWithResult:(MFMailComposeResult)result 
-                        error:(NSError *)error 
+- (void)mailComposeController:(MFMailComposeViewController *)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError *)error
 {
 	[self activityDidFinish:result == MFMailComposeResultSaved || result == MFMailComposeResultSent];
 }
