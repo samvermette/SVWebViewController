@@ -299,7 +299,6 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 - (void)updateToolbarItems {
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
     
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
