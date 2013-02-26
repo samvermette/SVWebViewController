@@ -511,9 +511,6 @@ NSString *const SVWebViewControllerActivityTypeMail = @"activity.Mail";
 }
         
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if(self.mainWebView.loading && -scrollView.contentOffset.y < scrollView.contentInset.top) {
-        scrollView.contentOffset = CGPointMake(0, -scrollView.contentInset.top);
-    }
     if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone && !self.alwaysShowNavigationBar) {
         scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(MAX(scrollView.contentInset.top, - scrollView.contentOffset.y), 0, 0, 0);
     } else {
