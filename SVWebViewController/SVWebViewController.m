@@ -8,7 +8,7 @@
 
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UIPopoverControllerDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *forwardBarButtonItem;
@@ -16,6 +16,13 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
+
+@property (nonatomic, strong, readonly) UIPopoverController *activityPopoverController;
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
+@property (nonatomic, strong) id activityViewController;
+#else 
+@property (nonatomic, strong) UIActivityViewController *activityViewController;
+#endif
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -39,8 +46,11 @@
 
 @synthesize availableActions;
 
+@synthesize useActivityViewController, applicationActivities;
+
 @synthesize URL, mainWebView;
 @synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize activityViewController, activityPopoverController;
 
 #pragma mark - setters and getters
 
@@ -118,6 +128,32 @@
     return pageActionSheet;
 }
 
+- (id)activityViewController {
+    if (!activityViewController) {
+        NSArray *activityItems = [NSArray arrayWithObject:self.mainWebView.request.URL];
+        activityViewController = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:self.applicationActivities];
+        
+        __weak __typeof__(self) weakSelf = self;
+        activityViewController.completionHandler = ^(NSString *activityType, BOOL completed) {
+            weakSelf.activityViewController = nil;
+        };
+        
+        NSMutableArray *excludedActivities = [NSMutableArray array];
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) != SVWebViewControllerAvailableActionsCopyLink) {
+            [excludedActivities addObject:UIActivityTypeCopyToPasteboard];
+        }
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsMailLink) != SVWebViewControllerAvailableActionsMailLink) {
+            [excludedActivities addObject:UIActivityTypeMail];
+        }
+        
+        activityViewController.excludedActivityTypes = excludedActivities;
+    }
+    
+    return activityViewController;
+}
+
 #pragma mark - Initialization
 
 - (id)initWithAddress:(NSString *)urlString {
@@ -162,6 +198,7 @@
     stopBarButtonItem = nil;
     actionBarButtonItem = nil;
     pageActionSheet = nil;
+    activityViewController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -277,8 +314,8 @@
                      nil];
         }
         
-				self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-				self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
 }
@@ -325,14 +362,30 @@
 
 - (void)actionButtonClicked:(id)sender {
     
-    if(pageActionSheet)
+    if (activityViewController) {
+        [activityPopoverController dismissPopoverAnimated:YES];
+        activityViewController = nil;
+        activityPopoverController = nil;
         return;
-	
-    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
-    else
-        [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+    }
     
+    if (pageActionSheet)
+        return;
+    
+    if (self.useActivityViewController) {
+        if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+            activityPopoverController = [[UIPopoverController alloc] initWithContentViewController:self.activityViewController];
+            activityPopoverController.delegate = self;
+            [activityPopoverController presentPopoverFromBarButtonItem:self.actionBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        } else {
+            [self presentViewController:self.activityViewController animated:YES completion:NULL];
+        }
+    } else {
+        if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+            [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
+        else
+            [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+    }
 }
 
 - (void)doneButtonClicked:(id)sender {
@@ -398,6 +451,14 @@
 	}
     
     pageActionSheet = nil;
+}
+
+#pragma mark -
+#pragma mark UIPopoverControllerDelegate
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
+    activityViewController = nil;
+    activityPopoverController = nil;
 }
 
 #pragma mark -
