@@ -10,6 +10,8 @@
 
 @interface ViewController : UIViewController
 
+@property (unsafe_unretained, nonatomic) IBOutlet UISwitch *useActivityViewControllerSwitch;
+
 - (IBAction)pushWebViewController;
 - (IBAction)presentWebViewController;
 

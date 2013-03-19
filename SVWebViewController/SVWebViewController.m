@@ -8,6 +8,9 @@
 
 #import "SVWebViewController.h"
 
+#import "TUSafariActivity.h"
+#import "ARChromeActivity.h"
+
 @interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UIPopoverControllerDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
@@ -18,11 +21,7 @@
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
 
 @property (nonatomic, strong, readonly) UIPopoverController *activityPopoverController;
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
-@property (nonatomic, strong) id activityViewController;
-#else 
 @property (nonatomic, strong) UIActivityViewController *activityViewController;
-#endif
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -128,12 +127,31 @@
     return pageActionSheet;
 }
 
-- (id)activityViewController {
+- (UIActivityViewController *)activityViewController {
+    NSAssert([UIActivityViewController class], @"UIActivityViewController can only be used on devices running iOS 6 or higher.");
     if (!activityViewController) {
         NSArray *activityItems = [NSArray arrayWithObject:self.mainWebView.request.URL];
-        activityViewController = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:self.applicationActivities];
         
+        NSMutableArray *activities = [[NSMutableArray alloc] initWithArray:self.applicationActivities];
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsOpenInSafari) == SVWebViewControllerAvailableActionsOpenInSafari) {
+            TUSafariActivity *safariActivity = [[TUSafariActivity alloc] init];
+            [activities addObject:safariActivity];
+        }
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsOpenInChrome) == SVWebViewControllerAvailableActionsOpenInChrome) {
+            ARChromeActivity *chromeActivity = [[ARChromeActivity alloc] init];
+            [activities addObject:chromeActivity];
+        }
+        
+        activityViewController = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:activities];
+        
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 50000
+        __unsafe_unretained __typeof__(self) weakSelf = self;
+#else
         __weak __typeof__(self) weakSelf = self;
+        
+#endif
         activityViewController.completionHandler = ^(NSString *activityType, BOOL completed) {
             weakSelf.activityViewController = nil;
         };
