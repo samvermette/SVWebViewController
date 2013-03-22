@@ -22,13 +22,21 @@
 
 #pragma mark - Initialization
 
-
 - (id)initWithAddress:(NSString*)urlString {
     return [self initWithURL:[NSURL URLWithString:urlString]];
 }
 
 - (id)initWithURL:(NSURL *)URL {
+    return [self initWithURL:URL hidingToolbar:NO];
+}
+    
+- (id)initWithAddress:(NSString*)urlString hidingToolbar:(BOOL)toobarHidden {
+    return [self initWithURL:[NSURL URLWithString:urlString] hidingToolbar:toobarHidden];
+}
+
+- (id)initWithURL:(NSURL *)URL hidingToolbar:(BOOL)toobarHidden {
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
+    self.toolbarHidden = toobarHidden;
     if (self = [super initWithRootViewController:self.webViewController]) {
         self.barButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
     }
@@ -46,6 +54,12 @@
     if (self.barsTintColor) {
         self.navigationBar.tintColor = self.barsTintColor;
     }
+}
+
+- (void)setToolbarHidden:(BOOL)toolbarHidden
+{
+    [super setToolbarHidden:toolbarHidden];
+    [self.webViewController setToolbarHidden:toolbarHidden];
 }
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {

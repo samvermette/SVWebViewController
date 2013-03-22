@@ -31,6 +31,8 @@ typedef NSUInteger SVWebViewControllerBarButtonItemPosition;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL *)URL;
+- (id)initWithAddress:(NSString*)urlString hidingToolbar:(BOOL)toobarHidden;
+- (id)initWithURL:(NSURL *)URL hidingToolbar:(BOOL)toobarHidden;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
