@@ -30,13 +30,19 @@
 - (id)initWithURL:(NSURL *)URL {
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
     if (self = [super initWithRootViewController:self.webViewController]) {
-        self.webViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
+        self.barButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
     }
     return self;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:NO];
+    if (self.barButtonItemPosition == SVWebViewControllerLeftBarButtonItem) {
+        self.webViewController.navigationItem.leftBarButtonItem = self.barButtonItem;
+    } else {
+        self.webViewController.navigationItem.rightBarButtonItem = self.barButtonItem;
+    }
+
     if (self.barsTintColor) {
         self.navigationBar.tintColor = self.barsTintColor;
     }
