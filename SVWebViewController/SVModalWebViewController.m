@@ -22,23 +22,44 @@
 
 #pragma mark - Initialization
 
-
 - (id)initWithAddress:(NSString*)urlString {
     return [self initWithURL:[NSURL URLWithString:urlString]];
 }
 
 - (id)initWithURL:(NSURL *)URL {
+    return [self initWithURL:URL hidingToolbar:NO];
+}
+    
+- (id)initWithAddress:(NSString*)urlString hidingToolbar:(BOOL)toobarHidden {
+    return [self initWithURL:[NSURL URLWithString:urlString] hidingToolbar:toobarHidden];
+}
+
+- (id)initWithURL:(NSURL *)URL hidingToolbar:(BOOL)toobarHidden {
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
+    self.toolbarHidden = toobarHidden;
     if (self = [super initWithRootViewController:self.webViewController]) {
-        self.webViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
+        self.barButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:webViewController action:@selector(doneButtonClicked:)];
     }
     return self;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:NO];
-    
-    self.navigationBar.tintColor = self.barsTintColor;
+    if (self.barButtonItemPosition == SVWebViewControllerLeftBarButtonItem) {
+        self.webViewController.navigationItem.leftBarButtonItem = self.barButtonItem;
+    } else {
+        self.webViewController.navigationItem.rightBarButtonItem = self.barButtonItem;
+    }
+
+    if (self.barsTintColor) {
+        self.navigationBar.tintColor = self.barsTintColor;
+    }
+}
+
+- (void)setToolbarHidden:(BOOL)toolbarHidden
+{
+    [super setToolbarHidden:toolbarHidden];
+    [self.webViewController setToolbarHidden:toolbarHidden];
 }
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {

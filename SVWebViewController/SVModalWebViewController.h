@@ -18,6 +18,12 @@ enum {
 
 typedef NSUInteger SVWebViewControllerAvailableActions;
 
+enum {
+    SVWebViewControllerLeftBarButtonItem,
+    SVWebViewControllerRightBarButtonItem
+};
+
+typedef NSUInteger SVWebViewControllerBarButtonItemPosition;
 
 @class SVWebViewController;
 
@@ -25,8 +31,12 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL *)URL;
+- (id)initWithAddress:(NSString*)urlString hidingToolbar:(BOOL)toobarHidden;
+- (id)initWithURL:(NSURL *)URL hidingToolbar:(BOOL)toobarHidden;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
+@property (nonatomic, readwrite) SVWebViewControllerBarButtonItemPosition barButtonItemPosition;
+@property (nonatomic, strong) UIBarButtonItem *barButtonItem;
 
 @end
