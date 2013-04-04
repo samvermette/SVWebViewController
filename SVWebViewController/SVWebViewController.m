@@ -5,8 +5,11 @@
 //  Copyright 2010 Sam Vermette. All rights reserved.
 //
 //  https://github.com/samvermette/SVWebViewController
+//
 
 #import "SVWebViewController.h"
+#import "ARChromeActivity.h" //subclass of UIActivity to present option to open in Chrome
+#import "TUSafariActivity.h" //subclass of UIActivity to present option to open in Safari
 
 @interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
