@@ -5,8 +5,11 @@
 //  Copyright 2010 Sam Vermette. All rights reserved.
 //
 //  https://github.com/samvermette/SVWebViewController
+//
 
 #import "SVWebViewController.h"
+#import "ARChromeActivity.h" //subclass of UIActivity to present option to open in Chrome
+#import "TUSafariActivity.h" //subclass of UIActivity to present option to open in Safari
 
 @interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
@@ -16,6 +19,9 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
+
+//Add iOS 6 UIActivityViewController
+@property (nonatomic, strong) UIActivityViewController *activityVC;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -138,6 +144,24 @@
     [mainWebView loadRequest:[NSURLRequest requestWithURL:pageURL]];
 }
 
+//Initialize UIActivityViewController
+-(void) initActivityVC
+{
+    NSArray* dataToShare = @[self.URL];
+    
+    ARChromeActivity *chromeActivity = [[ARChromeActivity alloc] init];
+    TUSafariActivity *safariActivity = [[TUSafariActivity alloc] init];
+    
+    NSArray *applicationActivities = @[safariActivity, chromeActivity];
+    
+    _activityVC = [[UIActivityViewController alloc] initWithActivityItems: dataToShare applicationActivities:applicationActivities];
+    
+    [self.activityVC setExcludedActivityTypes:@[UIActivityTypePostToWeibo]];
+    
+    NSLog(@"Finished initializeing ActicityVC");
+}
+
+
 #pragma mark - View lifecycle
 
 - (void)loadView {
@@ -172,6 +196,9 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:NO animated:animated];
     }
+    
+    //Initialize ActivityVC in viewWillAppear
+    [self initActivityVC];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -207,7 +234,10 @@
 - (void)updateToolbarItems {
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
+    
+    //The user should be able to use the share button before waiting for the page to load?
+    //self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
+    self.actionBarButtonItem.enabled = YES;
     
     UIBarButtonItem *refreshStopBarButtonItem = self.mainWebView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
@@ -330,9 +360,18 @@
         return;
 	
     if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
+        
+        //I commented out the ActionSheet reveal methods:
+        //[self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
+        
+        //TODO: present the ActivityVC differently for iPAD?
+        [self presentViewController:self.activityVC animated:YES completion:nil];
+    
     else
-        [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+        //[self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+        
+        //for iPhone
+        [self presentViewController:self.activityVC animated:YES completion:nil];
     
 }
 
