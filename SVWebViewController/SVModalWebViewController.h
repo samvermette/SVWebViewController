@@ -8,17 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-enum {
-    SVWebViewControllerAvailableActionsNone             = 0,
-    SVWebViewControllerAvailableActionsOpenInSafari     = 1 << 0,
-    SVWebViewControllerAvailableActionsMailLink         = 1 << 1,
-    SVWebViewControllerAvailableActionsCopyLink         = 1 << 2,
-    SVWebViewControllerAvailableActionsOpenInChrome     = 1 << 3
-};
-
-typedef NSUInteger SVWebViewControllerAvailableActions;
-
-
 @class SVWebViewController;
 
 @interface SVModalWebViewController : UINavigationController
@@ -27,6 +16,26 @@ typedef NSUInteger SVWebViewControllerAvailableActions;
 - (id)initWithURL:(NSURL *)URL;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
-@property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
+
+@property (nonatomic, copy) NSArray *excludedActivityTypes;
+@property (nonatomic, copy) NSArray *applicationActivities;
+@property (nonatomic, readwrite) BOOL alwaysShowNavigationBar;
 
 @end
+
+@interface SVWebViewControllerActivity : NSObject 
+
+@property (strong, readonly) UIWebView *webView;
+
+- (NSString *)activityTitle;
+- (UIViewController *)activityViewController;
+- (void)performActivity;
+
+- (void)activityDidFinish:(BOOL)completed;
+
+@end
+
+extern NSString *const SVWebViewControllerActivityTypeSafari;
+extern NSString *const SVWebViewControllerActivityTypeChrome;
+extern NSString *const SVWebViewControllerActivityTypeMail;
+extern NSString *const SVWebViewControllerActivityTypeCopyToPasteboard;
