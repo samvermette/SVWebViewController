@@ -19,6 +19,8 @@
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, strong) NSString *HTMLString;
+@property (nonatomic, strong) NSURL *baseURL;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -134,8 +136,23 @@
     return self;
 }
 
+- (id)initWithHTML:(NSString *)html baseURL:(NSURL *)baseURL{
+    
+    if(self = [super init]) {
+        self.HTMLString = html;
+        self.baseURL = baseURL;
+    }
+    
+    return self;
+}
+
+
 - (void)loadURL:(NSURL *)pageURL {
     [mainWebView loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+- (void)loadHTML:(NSString *) string baseURL:(NSURL *)baseURL{
+    [mainWebView loadHTMLString:string baseURL:baseURL];
 }
 
 #pragma mark - View lifecycle
@@ -144,7 +161,11 @@
     mainWebView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     mainWebView.delegate = self;
     mainWebView.scalesPageToFit = YES;
-    [self loadURL:self.URL];
+    if (self.URL != nil)
+        [self loadURL:self.URL];
+    else
+        [self loadHTML:self.HTMLString baseURL:self.baseURL];
+    
     self.view = mainWebView;
 }
 
@@ -169,7 +190,10 @@
     
 	[super viewWillAppear:animated];
 	
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+    if (self.HTMLString != nil) {
+        [self.navigationController setToolbarHidden:YES animated:animated];
+    }
+    else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:NO animated:animated];
     }
 }
