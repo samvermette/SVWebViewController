@@ -92,13 +92,13 @@
 - (UIActionSheet *)pageActionSheet {
     
     if(!pageActionSheet) {
-        pageActionSheet = [[UIActionSheet alloc] 
-                        initWithTitle:self.mainWebView.request.URL.absoluteString
-                        delegate:self 
-                        cancelButtonTitle:nil   
-                        destructiveButtonTitle:nil   
-                        otherButtonTitles:nil]; 
-
+        pageActionSheet = [[UIActionSheet alloc]
+                           initWithTitle:self.mainWebView.request.URL.absoluteString
+                           delegate:self
+                           cancelButtonTitle:nil
+                           destructiveButtonTitle:nil
+                           otherButtonTitles:nil];
+        
         if((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) == SVWebViewControllerAvailableActionsCopyLink)
             [pageActionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Copy Link", @"SVWebViewController", @"")];
         
@@ -110,6 +110,9 @@
         
         if([MFMailComposeViewController canSendMail] && (self.availableActions & SVWebViewControllerAvailableActionsMailLink) == SVWebViewControllerAvailableActionsMailLink)
             [pageActionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Mail Link to this Page", @"SVWebViewController", @"")];
+        
+        if([MFMailComposeViewController canSendMail] && (self.availableActions & SVWebViewControllerAvailableActionsMailContent) == SVWebViewControllerAvailableActionsMailContent)
+            [pageActionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Mail this Page", @"SVWebViewController", @"")];
         
         [pageActionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Cancel", @"SVWebViewController", @"")];
         pageActionSheet.cancelButtonIndex = [self.pageActionSheet numberOfButtons]-1;
@@ -246,10 +249,10 @@
         
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
-				toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+        toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
-    } 
+    }
     
     else {
         NSArray *items;
@@ -257,7 +260,7 @@
         if(self.availableActions == 0) {
             items = [NSArray arrayWithObjects:
                      flexibleSpace,
-                     self.backBarButtonItem, 
+                     self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
@@ -267,7 +270,7 @@
         } else {
             items = [NSArray arrayWithObjects:
                      fixedSpace,
-                     self.backBarButtonItem, 
+                     self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
@@ -278,8 +281,8 @@
                      nil];
         }
         
-				self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-				self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
 }
@@ -389,6 +392,37 @@
 		mailViewController.mailComposeDelegate = self;
         [mailViewController setSubject:[self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.title"]];
   		[mailViewController setMessageBody:self.mainWebView.request.URL.absoluteString isHTML:NO];
+		mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
+        
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
+		[self presentModalViewController:mailViewController animated:YES];
+#else
+        [self presentViewController:mailViewController animated:YES completion:NULL];
+#endif
+	}
+    
+    else if([title localizedCompare:NSLocalizedStringFromTable(@"Mail this Page", @"SVWebViewController", @"")] == NSOrderedSame) {
+        
+		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
+        
+		mailViewController.mailComposeDelegate = self;
+        [mailViewController setSubject:[self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.title"]];
+        
+        NSString *pageContent = [self.mainWebView stringByEvaluatingJavaScriptFromString:@"document.documentElement.outerHTML"];
+        if (pageContent && ! [pageContent isEqualToString:@""]) {
+            [mailViewController setMessageBody:pageContent isHTML:YES];
+        }
+        else {
+            
+            NSData *pageData = [NSData dataWithContentsOfURL:self.mainWebView.request.URL];
+            NSDictionary *mimeBundle = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"SVWebViewController.bundle/MIME" ofType:@"plist"]];
+            NSString *mimeType = [mimeBundle objectForKey:[self.mainWebView.request.URL.absoluteString pathExtension]];
+            if (mimeType)
+            {
+                [mailViewController addAttachmentData:pageData mimeType:mimeType fileName:[self.mainWebView.request.URL.absoluteURL lastPathComponent]];
+            }
+        }
+        
 		mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
         
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000

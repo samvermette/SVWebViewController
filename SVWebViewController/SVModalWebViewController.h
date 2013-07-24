@@ -13,7 +13,8 @@ enum {
     SVWebViewControllerAvailableActionsOpenInSafari     = 1 << 0,
     SVWebViewControllerAvailableActionsMailLink         = 1 << 1,
     SVWebViewControllerAvailableActionsCopyLink         = 1 << 2,
-    SVWebViewControllerAvailableActionsOpenInChrome     = 1 << 3
+    SVWebViewControllerAvailableActionsOpenInChrome     = 1 << 3,
+    SVWebViewControllerAvailableActionsMailContent      = 1 << 4
 };
 
 typedef NSUInteger SVWebViewControllerAvailableActions;
