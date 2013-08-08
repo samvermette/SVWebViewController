@@ -92,13 +92,13 @@
 - (UIActionSheet *)pageActionSheet {
     
     if(!pageActionSheet) {
-        pageActionSheet = [[UIActionSheet alloc] 
-                        initWithTitle:self.mainWebView.request.URL.absoluteString
-                        delegate:self 
-                        cancelButtonTitle:nil   
-                        destructiveButtonTitle:nil   
-                        otherButtonTitles:nil]; 
-
+        pageActionSheet = [[UIActionSheet alloc]
+						   initWithTitle:self.mainWebView.request.URL.absoluteString
+						   delegate:self
+						   cancelButtonTitle:nil
+						   destructiveButtonTitle:nil
+						   otherButtonTitles:nil];
+		
         if((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) == SVWebViewControllerAvailableActionsCopyLink)
             [pageActionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Copy Link", @"SVWebViewController", @"")];
         
@@ -177,6 +177,11 @@
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
+	if (DeviceSystemMajorVersion() >= 7) {
+		[self hideActionSheetIfVisible];
+	}
+	
+	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
@@ -231,25 +236,48 @@
                      fixedSpace,
                      nil];
         } else {
-            items = [NSArray arrayWithObjects:
-                     fixedSpace,
-                     refreshStopBarButtonItem,
-                     flexibleSpace,
-                     self.backBarButtonItem,
-                     flexibleSpace,
-                     self.forwardBarButtonItem,
-                     flexibleSpace,
-                     self.actionBarButtonItem,
-                     fixedSpace,
-                     nil];
+			
+			if (DeviceSystemMajorVersion() < 7) {
+				
+				items = [NSArray arrayWithObjects:
+						 fixedSpace,
+						 refreshStopBarButtonItem,
+						 flexibleSpace,
+						 self.backBarButtonItem,
+						 flexibleSpace,
+						 self.forwardBarButtonItem,
+						 flexibleSpace,
+						 self.actionBarButtonItem,
+						 fixedSpace,
+						 nil];
+			} else {
+				// iOS 7 Support
+				items = [NSArray arrayWithObjects:
+						 fixedSpace,
+						 self.actionBarButtonItem,
+						 fixedSpace,
+						 self.forwardBarButtonItem,
+						 fixedSpace,
+						 self.backBarButtonItem,
+						 fixedSpace,
+						 refreshStopBarButtonItem,
+						 fixedSpace,
+						 nil];
+			}
         }
         
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
-				toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+		toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
-    } 
+		
+		if (DeviceSystemMajorVersion() < 7)
+			self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
+		else
+			self.navigationItem.rightBarButtonItems = items;
+		
+    }
     
     else {
         NSArray *items;
@@ -257,7 +285,7 @@
         if(self.availableActions == 0) {
             items = [NSArray arrayWithObjects:
                      flexibleSpace,
-                     self.backBarButtonItem, 
+                     self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
@@ -267,7 +295,7 @@
         } else {
             items = [NSArray arrayWithObjects:
                      fixedSpace,
-                     self.backBarButtonItem, 
+                     self.backBarButtonItem,
                      flexibleSpace,
                      self.forwardBarButtonItem,
                      flexibleSpace,
@@ -278,8 +306,8 @@
                      nil];
         }
         
-				self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-				self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+		self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+		self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
 }
@@ -325,14 +353,19 @@
 }
 
 - (void)actionButtonClicked:(id)sender {
-    
-    if(pageActionSheet)
-        return;
 	
-    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
-    else
-        [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+		if (self.pageActionSheet.visible) {
+			[self.pageActionSheet dismissWithClickedButtonIndex:self.pageActionSheet.cancelButtonIndex animated:NO];
+		} else
+			[self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
+	}
+    else {
+		if (self.pageActionSheet.visible) {
+			[self.pageActionSheet dismissWithClickedButtonIndex:self.pageActionSheet.cancelButtonIndex animated:NO];
+		} else
+			[self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+	}
     
 }
 
@@ -401,6 +434,12 @@
     pageActionSheet = nil;
 }
 
+- (void) hideActionSheetIfVisible {
+	if (self.pageActionSheet.visible) {
+		[self.pageActionSheet dismissWithClickedButtonIndex:self.pageActionSheet.cancelButtonIndex animated:NO];
+	}
+}
+
 #pragma mark -
 #pragma mark MFMailComposeViewControllerDelegate
 
@@ -414,6 +453,16 @@
 #else
     [self dismissViewControllerAnimated:YES completion:NULL];
 #endif
+}
+
+
+NSUInteger DeviceSystemMajorVersion() {
+    static NSUInteger _deviceSystemMajorVersion = -1;
+    static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		_deviceSystemMajorVersion = [[[[[UIDevice currentDevice] systemVersion] componentsSeparatedByString:@"."] objectAtIndex:0] intValue];
+	});
+	return _deviceSystemMajorVersion;
 }
 
 @end
