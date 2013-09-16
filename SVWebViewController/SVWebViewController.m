@@ -210,6 +210,13 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
+	
+	if (self.hideToolbar) {
+		self.navigationItem.rightBarButtonItems = nil;
+		 [self.navigationController setToolbarHidden:YES animated:NO];
+		return;
+	}
+	
     self.backBarButtonItem.enabled = self.mainWebView.canGoBack;
     self.forwardBarButtonItem.enabled = self.mainWebView.canGoForward;
     self.actionBarButtonItem.enabled = !self.mainWebView.isLoading;
@@ -269,7 +276,7 @@
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
 		toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-
+		
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
 		
 		if (DeviceSystemMajorVersion() < 7)
@@ -277,9 +284,9 @@
 		else
 			self.navigationItem.rightBarButtonItems = items;
 		
-    }
-    
-    else {
+    } else {
+		// iPhone
+		
         NSArray *items;
         
         if(self.availableActions == 0) {
@@ -324,8 +331,10 @@
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
-    self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
-    [self updateToolbarItems];
+	if (!self.hideToolbar) {
+		self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+		[self updateToolbarItems];
+	}
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -463,6 +472,11 @@ NSUInteger DeviceSystemMajorVersion() {
 		_deviceSystemMajorVersion = [[[[[UIDevice currentDevice] systemVersion] componentsSeparatedByString:@"."] objectAtIndex:0] intValue];
 	});
 	return _deviceSystemMajorVersion;
+}
+
+- (BOOL)prefersStatusBarHidden
+{
+    return YES;
 }
 
 @end
