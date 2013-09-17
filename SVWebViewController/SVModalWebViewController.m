@@ -32,7 +32,12 @@
     [super viewWillAppear:NO];
     
     self.webViewController.title = self.title;
-    self.navigationBar.tintColor = self.barsTintColor;
+	
+	if (DeviceSystemMajorVersion() < 7) {
+		self.navigationBar.tintColor = self.barsTintColor;
+	} else {
+		self.navigationBar.barTintColor = self.barsTintColor;
+	}
 	
 	if (DeviceSystemMajorVersion()< 7) {
 		self.navigationBar.barStyle = UIBarStyleBlackOpaque;
