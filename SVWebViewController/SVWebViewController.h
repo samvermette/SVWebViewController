@@ -13,9 +13,9 @@
 @protocol SVWebViewDelegate <NSObject>
 
 @optional
-- (void)webViewDidStartLoad:(UIWebView*)webView;
-- (void)webViewDidFinishLoad:(UIWebView*)webView;
-- (void)webView:(UIWebView*)webView didFailLoadWithError:(NSError *)error;
+- (void)svWebViewDidStartLoad:(UIWebView*)webView;
+- (void)svWebViewDidFinishLoad:(UIWebView*)webView;
+- (void)svWebView:(UIWebView*)webView didFailLoadWithError:(NSError *)error;
 
 @end
 
@@ -26,6 +26,6 @@
 - (id)initWithURL:(NSURL*)URL;
 
 @property (nonatomic, readwrite) SVWebViewControllerAvailableActions availableActions;
-@property (nonatomic, strong) id<SVWebViewDelegate> delegate;
+@property (nonatomic, strong) id<SVWebViewDelegate> svDelegate;
 
 @end

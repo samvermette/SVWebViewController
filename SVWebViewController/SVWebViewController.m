@@ -291,8 +291,8 @@
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [self updateToolbarItems];
     
-    if ([self.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
-        [self.delegate webViewDidStartLoad:webView];
+    if ([self.svDelegate respondsToSelector:@selector(svWebViewDidStartLoad:)]) {
+        [self.svDelegate svWebViewDidStartLoad:webView];
     }
 }
 
@@ -303,8 +303,8 @@
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
     
-    if ([self.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-        [self.delegate webViewDidFinishLoad:webView];
+    if ([self.svDelegate respondsToSelector:@selector(svWebViewDidFinishLoad:)]) {
+        [self.svDelegate svWebViewDidFinishLoad:webView];
     }
 }
 
@@ -312,8 +312,8 @@
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
     
-    if ([self.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
-        [self.delegate webView:webView didFailLoadWithError:error];
+    if ([self.svDelegate respondsToSelector:@selector(svWebView:didFailLoadWithError:)]) {
+        [self.svDelegate svWebView:webView didFailLoadWithError:error];
     }
 }
 

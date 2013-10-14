@@ -47,7 +47,7 @@
 }
 
 - (void)setDelegate:(id<SVWebViewDelegate>)delegate {
-    self.webViewController.delegate = delegate;
+    self.webViewController.svDelegate = delegate;
 }
 
 @end
