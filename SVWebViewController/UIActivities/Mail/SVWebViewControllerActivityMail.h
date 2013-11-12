@@ -10,5 +10,6 @@
 
 @interface SVWebViewControllerActivityMail : SVWebViewControllerActivity
 
-@property(nonatomic, weak) UIWebView *webView;
+- (instancetype)initWithWebView:(UIWebView *)webView;
+
 @end

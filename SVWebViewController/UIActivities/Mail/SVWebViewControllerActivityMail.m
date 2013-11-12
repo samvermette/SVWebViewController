@@ -9,10 +9,20 @@
 #import "SVWebViewControllerActivityMail.h"
 #import <MessageUI/MessageUI.h>
 
-@interface SVWebViewControllerActivityMail() <MFMailComposeViewControllerDelegate>
+@interface SVWebViewControllerActivityMail() <MFMailComposeViewControllerDelegate> {
+    NSString *subject, *pageContent;
+}
 @end
 
 @implementation SVWebViewControllerActivityMail
+
+- (instancetype)initWithWebView:(UIWebView *)webView {
+    if ([self init]) {
+        subject = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+        pageContent = [webView stringByEvaluatingJavaScriptFromString:@"document.documentElement.outerHTML"];
+    }
+    return self;
+}
 
 - (NSString *)activityTitle {
     return NSLocalizedStringFromTable(@"Mail this Page", @"SVWebViewController", nil);
@@ -22,8 +32,7 @@
     for (id activityItem in activityItems) {
         if ([activityItem isKindOfClass:[NSURL class]]
                 && [[UIApplication sharedApplication] canOpenURL:activityItem]
-                && [MFMailComposeViewController canSendMail]
-                && self.webView) {
+                && [MFMailComposeViewController canSendMail]) {
             return YES;
         }
     }
@@ -34,9 +43,8 @@
     MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
 
     mailViewController.mailComposeDelegate = self;
-    [mailViewController setSubject:[self.webView stringByEvaluatingJavaScriptFromString:@"document.title"]];
-    NSString *pageContent = [self.webView stringByEvaluatingJavaScriptFromString:@"document.documentElement.outerHTML"];
-    if (pageContent && ![pageContent isEqualToString:@""]) {
+    [mailViewController setSubject:subject];
+    if (![pageContent isEqualToString:@""]) {
         [mailViewController setMessageBody:pageContent isHTML:YES];
     }
     else {

@@ -263,9 +263,7 @@
 }
 
 - (void)actionButtonClicked:(id)sender {
-    SVWebViewControllerActivityMail *activityMail = [SVWebViewControllerActivityMail new];
-    activityMail.webView = self.webView;
-    
+    SVWebViewControllerActivityMail *activityMail = [[SVWebViewControllerActivityMail alloc] initWithWebView:self.webView];
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new], activityMail];
     
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
