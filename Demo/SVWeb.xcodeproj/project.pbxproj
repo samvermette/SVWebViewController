@@ -28,6 +28,9 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* ViewController.m */; };
 		28F335F11007B36200424DE2 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* ViewController.xib */; };
+		43B4DF701832B4D10045034B /* SVWebViewControllerActivityMail-iPad.png in Resources */ = {isa = PBXBuildFile; fileRef = 43B4DF6D1832B4D10045034B /* SVWebViewControllerActivityMail-iPad.png */; };
+		43B4DF711832B4D10045034B /* SVWebViewControllerActivityMail-iPad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 43B4DF6E1832B4D10045034B /* SVWebViewControllerActivityMail-iPad@2x.png */; };
+		43B4DF721832B4D10045034B /* SVWebViewControllerActivityMail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 43B4DF6F1832B4D10045034B /* SVWebViewControllerActivityMail@2x.png */; };
 		64C115ABD6507A42ABA27D05 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C11EA2F64A705F84CF93F7 /* MessageUI.framework */; };
 		64C11632DE75881828EF2757 /* SVWebViewControllerActivityMail.m in Sources */ = {isa = PBXBuildFile; fileRef = 64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */; };
 		D53D8F1316A8688600711E30 /* SVWebViewController.strings in Resources */ = {isa = PBXBuildFile; fileRef = D53D8F1516A8688600711E30 /* SVWebViewController.strings */; };
@@ -68,6 +71,9 @@
 		28F335F01007B36200424DE2 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ViewController.xib; path = ../ViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		431F485D17145A510045AA32 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/SVWebViewController.strings; sourceTree = "<group>"; };
+		43B4DF6D1832B4D10045034B /* SVWebViewControllerActivityMail-iPad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityMail-iPad.png"; sourceTree = "<group>"; };
+		43B4DF6E1832B4D10045034B /* SVWebViewControllerActivityMail-iPad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityMail-iPad@2x.png"; sourceTree = "<group>"; };
+		43B4DF6F1832B4D10045034B /* SVWebViewControllerActivityMail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityMail@2x.png"; sourceTree = "<group>"; };
 		64C1191A8ADBC3EBA8FDA995 /* SVWebViewControllerActivityMail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVWebViewControllerActivityMail.h; sourceTree = "<group>"; };
 		64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVWebViewControllerActivityMail.m; sourceTree = "<group>"; };
 		64C11EA2F64A705F84CF93F7 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
@@ -222,6 +228,9 @@
 		64C11D6AB4AF4FE307E0E190 /* Mail */ = {
 			isa = PBXGroup;
 			children = (
+				43B4DF6D1832B4D10045034B /* SVWebViewControllerActivityMail-iPad.png */,
+				43B4DF6E1832B4D10045034B /* SVWebViewControllerActivityMail-iPad@2x.png */,
+				43B4DF6F1832B4D10045034B /* SVWebViewControllerActivityMail@2x.png */,
 				64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */,
 				64C1191A8ADBC3EBA8FDA995 /* SVWebViewControllerActivityMail.h */,
 			);
@@ -304,10 +313,13 @@
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
 				22AAF0BA1831F52F00AB15C4 /* SVWebViewControllerActivitySafari-iPad.png in Resources */,
 				22AAF0BB1831F52F00AB15C4 /* SVWebViewControllerActivitySafari-iPad@2x.png in Resources */,
+				43B4DF711832B4D10045034B /* SVWebViewControllerActivityMail-iPad@2x.png in Resources */,
 				22AAF0B71831F52F00AB15C4 /* SVWebViewControllerActivityChrome-iPad@2x.png in Resources */,
 				22AAF0B61831F52F00AB15C4 /* SVWebViewControllerActivityChrome-iPad.png in Resources */,
 				28F335F11007B36200424DE2 /* ViewController.xib in Resources */,
+				43B4DF701832B4D10045034B /* SVWebViewControllerActivityMail-iPad.png in Resources */,
 				22473B9C133800DD00F497E6 /* MainWindow-iPad.xib in Resources */,
+				43B4DF721832B4D10045034B /* SVWebViewControllerActivityMail@2x.png in Resources */,
 				220F0B9F138E0EF400F59FC3 /* SVWebViewController.bundle in Resources */,
 				22AAF0BD1831F52F00AB15C4 /* SVWebViewControllerActivitySafari@2x.png in Resources */,
 				22AAF0BF1831F5B300AB15C4 /* README.md in Resources */,

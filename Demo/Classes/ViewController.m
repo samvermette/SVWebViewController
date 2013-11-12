@@ -26,6 +26,12 @@
     [self presentViewController:webViewController animated:YES completion:NULL];
 }
 
+- (IBAction)openPdf:(id)sender {
+    NSURL *URL = [NSURL URLWithString:@"http://stlab.adobe.com/wiki/images/d/d3/Test.pdf"];
+	SVWebViewController *webViewController = [[SVWebViewController alloc] initWithURL:URL];
+	[self.navigationController pushViewController:webViewController animated:YES];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	return YES;
 }
