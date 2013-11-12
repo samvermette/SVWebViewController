@@ -8,7 +8,10 @@
 
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+#import "TUSafariActivity.h"
+#import "ARChromeActivity.h"
+
+@interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, UIPopoverControllerDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *forwardBarButtonItem;
@@ -16,6 +19,9 @@
 @property (nonatomic, strong, readonly) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong, readonly) UIBarButtonItem *actionBarButtonItem;
 @property (nonatomic, strong, readonly) UIActionSheet *pageActionSheet;
+
+@property (nonatomic, strong, readonly) UIPopoverController *activityPopoverController;
+@property (nonatomic, strong) UIActivityViewController *activityViewController;
 
 @property (nonatomic, strong) UIWebView *mainWebView;
 @property (nonatomic, strong) NSURL *URL;
@@ -39,8 +45,11 @@
 
 @synthesize availableActions;
 
+@synthesize useActivityViewController, applicationActivities;
+
 @synthesize URL, mainWebView;
 @synthesize backBarButtonItem, forwardBarButtonItem, refreshBarButtonItem, stopBarButtonItem, actionBarButtonItem, pageActionSheet;
+@synthesize activityViewController, activityPopoverController;
 
 #pragma mark - setters and getters
 
@@ -118,6 +127,51 @@
     return pageActionSheet;
 }
 
+- (UIActivityViewController *)activityViewController {
+    NSAssert([UIActivityViewController class], @"UIActivityViewController can only be used on devices running iOS 6 or higher.");
+    if (!activityViewController) {
+        NSArray *activityItems = [NSArray arrayWithObject:self.mainWebView.request.URL];
+        
+        NSMutableArray *activities = [[NSMutableArray alloc] initWithArray:self.applicationActivities];
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsOpenInSafari) == SVWebViewControllerAvailableActionsOpenInSafari) {
+            TUSafariActivity *safariActivity = [[TUSafariActivity alloc] init];
+            [activities addObject:safariActivity];
+        }
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsOpenInChrome) == SVWebViewControllerAvailableActionsOpenInChrome) {
+            ARChromeActivity *chromeActivity = [[ARChromeActivity alloc] init];
+            [activities addObject:chromeActivity];
+        }
+        
+        activityViewController = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:activities];
+        
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 50000
+        __unsafe_unretained __typeof__(self) weakSelf = self;
+#else
+        __weak __typeof__(self) weakSelf = self;
+        
+#endif
+        activityViewController.completionHandler = ^(NSString *activityType, BOOL completed) {
+            weakSelf.activityViewController = nil;
+        };
+        
+        NSMutableArray *excludedActivities = [NSMutableArray array];
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsCopyLink) != SVWebViewControllerAvailableActionsCopyLink) {
+            [excludedActivities addObject:UIActivityTypeCopyToPasteboard];
+        }
+        
+        if ((self.availableActions & SVWebViewControllerAvailableActionsMailLink) != SVWebViewControllerAvailableActionsMailLink) {
+            [excludedActivities addObject:UIActivityTypeMail];
+        }
+        
+        activityViewController.excludedActivityTypes = excludedActivities;
+    }
+    
+    return activityViewController;
+}
+
 #pragma mark - Initialization
 
 - (id)initWithAddress:(NSString *)urlString {
@@ -162,6 +216,7 @@
     stopBarButtonItem = nil;
     actionBarButtonItem = nil;
     pageActionSheet = nil;
+    activityViewController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -278,8 +333,8 @@
                      nil];
         }
         
-				self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-				self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
 }
@@ -326,14 +381,30 @@
 
 - (void)actionButtonClicked:(id)sender {
     
-    if(pageActionSheet)
+    if (activityViewController) {
+        [activityPopoverController dismissPopoverAnimated:YES];
+        activityViewController = nil;
+        activityPopoverController = nil;
         return;
-	
-    if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
-    else
-        [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+    }
     
+    if (pageActionSheet)
+        return;
+    
+    if (self.useActivityViewController) {
+        if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+            activityPopoverController = [[UIPopoverController alloc] initWithContentViewController:self.activityViewController];
+            activityPopoverController.delegate = self;
+            [activityPopoverController presentPopoverFromBarButtonItem:self.actionBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        } else {
+            [self presentViewController:self.activityViewController animated:YES completion:NULL];
+        }
+    } else {
+        if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+            [self.pageActionSheet showFromBarButtonItem:self.actionBarButtonItem animated:YES];
+        else
+            [self.pageActionSheet showFromToolbar:self.navigationController.toolbar];
+    }
 }
 
 - (void)doneButtonClicked:(id)sender {
@@ -399,6 +470,14 @@
 	}
     
     pageActionSheet = nil;
+}
+
+#pragma mark -
+#pragma mark UIPopoverControllerDelegate
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
+    activityViewController = nil;
+    activityPopoverController = nil;
 }
 
 #pragma mark -

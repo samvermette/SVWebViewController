@@ -19,6 +19,7 @@
 @implementation SVModalWebViewController
 
 @synthesize barsTintColor, availableActions, webViewController;
+@synthesize useActivityViewController, applicationActivities;
 
 #pragma mark - Initialization
 
@@ -44,6 +45,10 @@
 
 - (void)setAvailableActions:(SVWebViewControllerAvailableActions)newAvailableActions {
     self.webViewController.availableActions = newAvailableActions;
+}
+
+- (void)setUseActivityViewController:(BOOL)shouldUseActivityController {
+    self.webViewController.useActivityViewController = shouldUseActivityController;
 }
 
 @end

@@ -1,0 +1,6 @@
+[submodule "ARChromeActivity"]
+	path = ARChromeActivity
+	url = git://github.com/alextrob/ARChromeActivity.git
+[submodule "TUSafariActivity"]
+	path = TUSafariActivity
+	url = git://github.com/davbeck/TUSafariActivity.git
