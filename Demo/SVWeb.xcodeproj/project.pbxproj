@@ -28,6 +28,8 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* ViewController.m */; };
 		28F335F11007B36200424DE2 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* ViewController.xib */; };
+		64C115ABD6507A42ABA27D05 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C11EA2F64A705F84CF93F7 /* MessageUI.framework */; };
+		64C11632DE75881828EF2757 /* SVWebViewControllerActivityMail.m in Sources */ = {isa = PBXBuildFile; fileRef = 64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */; };
 		D53D8F1316A8688600711E30 /* SVWebViewController.strings in Resources */ = {isa = PBXBuildFile; fileRef = D53D8F1516A8688600711E30 /* SVWebViewController.strings */; };
 		D5FA63C516A8707A0087531C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5FA63C416A8707A0087531C /* Default-568h@2x.png */; };
 /* End PBXBuildFile section */
@@ -66,6 +68,9 @@
 		28F335F01007B36200424DE2 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ViewController.xib; path = ../ViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		431F485D17145A510045AA32 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/SVWebViewController.strings; sourceTree = "<group>"; };
+		64C1191A8ADBC3EBA8FDA995 /* SVWebViewControllerActivityMail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVWebViewControllerActivityMail.h; sourceTree = "<group>"; };
+		64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVWebViewControllerActivityMail.m; sourceTree = "<group>"; };
+		64C11EA2F64A705F84CF93F7 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		6DAD2E4EAB184F72ACE29999 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* SVWeb-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SVWeb-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		A0667BBC457D4307AC51AC26 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
@@ -82,6 +87,7 @@
 			files = (
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				64C115ABD6507A42ABA27D05 /* MessageUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,6 +168,7 @@
 				22DBB6691831E05D0008887C /* SVWebViewControllerActivity.m */,
 				22AAF0B01831F52F00AB15C4 /* Safari */,
 				22AAF0AA1831F52F00AB15C4 /* Chrome */,
+				64C11D6AB4AF4FE307E0E190 /* Mail */,
 			);
 			path = UIActivities;
 			sourceTree = "<group>";
@@ -207,8 +214,18 @@
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				6DAD2E4EAB184F72ACE29999 /* libPods.a */,
+				64C11EA2F64A705F84CF93F7 /* MessageUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		64C11D6AB4AF4FE307E0E190 /* Mail */ = {
+			isa = PBXGroup;
+			children = (
+				64C11DA2A767B9B4B035B5CD /* SVWebViewControllerActivityMail.m */,
+				64C1191A8ADBC3EBA8FDA995 /* SVWebViewControllerActivityMail.h */,
+			);
+			path = Mail;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -315,6 +332,7 @@
 				22F087701458794B003ECD31 /* SVModalWebViewController.m in Sources */,
 				22AAF0B81831F52F00AB15C4 /* SVWebViewControllerActivityChrome.m in Sources */,
 				22AAF0BC1831F52F00AB15C4 /* SVWebViewControllerActivitySafari.m in Sources */,
+				64C11632DE75881828EF2757 /* SVWebViewControllerActivityMail.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
