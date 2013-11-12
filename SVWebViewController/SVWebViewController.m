@@ -290,6 +290,10 @@
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [self updateToolbarItems];
+    
+    if ([self.svDelegate respondsToSelector:@selector(svWebViewDidStartLoad:)]) {
+        [self.svDelegate svWebViewDidStartLoad:webView];
+    }
 }
 
 
@@ -298,11 +302,19 @@
     
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
+    
+    if ([self.svDelegate respondsToSelector:@selector(svWebViewDidFinishLoad:)]) {
+        [self.svDelegate svWebViewDidFinishLoad:webView];
+    }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
+    
+    if ([self.svDelegate respondsToSelector:@selector(svWebView:didFailLoadWithError:)]) {
+        [self.svDelegate svWebView:webView didFailLoadWithError:error];
+    }
 }
 
 #pragma mark - Target actions

@@ -46,4 +46,8 @@
     self.webViewController.availableActions = newAvailableActions;
 }
 
+- (void)setDelegate:(id<SVWebViewDelegate>)delegate {
+    self.webViewController.svDelegate = delegate;
+}
+
 @end
