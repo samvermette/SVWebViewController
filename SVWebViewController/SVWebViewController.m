@@ -23,6 +23,7 @@
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithHTMLString:(NSString*)HTMLString;
 - (void)loadURL:(NSURL*)URL;
 
 - (void)updateToolbarItems;
@@ -54,6 +55,19 @@
     
     if(self = [super init]) {
         self.URL = pageURL;
+    }
+    
+    return self;
+}
+
+- (id)initWithHTMLString:(NSString*)pageHTMLString {
+    
+    if(self = [super init]) {
+        NSURL *tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
+        NSURL *fileURL = [[tmpDirURL URLByAppendingPathComponent:@"SVWebTemp"] URLByAppendingPathExtension:@"html"];
+        
+        [pageHTMLString writeToFile:[fileURL path] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        self.URL = fileURL;
     }
     
     return self;
