@@ -20,9 +20,13 @@
 
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, strong) NSString *tempFilePath;
+@property (nonatomic, strong) NSURL *customURL;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithHTMLString:(NSString*)HTMLString;
+- (id)initWithHTMLString:(NSString*)HTMLString customURL:(NSURL*)URL;
 - (void)loadURL:(NSURL*)URL;
 
 - (void)updateToolbarItems;
@@ -54,6 +58,31 @@
     
     if(self = [super init]) {
         self.URL = pageURL;
+    }
+    
+    return self;
+}
+
+- (id)initWithHTMLString:(NSString*)pageHTMLString {
+    
+    if(self = [super init]) {
+        NSURL *tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
+        NSURL *filePath = [[tmpDirURL URLByAppendingPathComponent:@"SVWebTemp"] URLByAppendingPathExtension:@"html"];
+        self.tempFilePath = [filePath path];
+        [pageHTMLString writeToFile:self.tempFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        
+        self.URL = filePath;
+    }
+    
+    return self;
+}
+
+- (id)initWithHTMLString:(NSString*)pageHTMLString customURL:(NSURL*)pageCustomURL {
+    
+    if(self = [super init]) {
+        self = [self initWithHTMLString:pageHTMLString];
+        
+        self.customURL = pageCustomURL;
     }
     
     return self;
@@ -174,7 +203,13 @@
 - (void)updateToolbarItems {
     self.backBarButtonItem.enabled = self.self.webView.canGoBack;
     self.forwardBarButtonItem.enabled = self.self.webView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.self.webView.isLoading;
+    
+    if ([[self.self.webView.request.URL path] isEqualToString:self.tempFilePath] && self.customURL == NULL) {
+        self.actionBarButtonItem.enabled = FALSE; //
+    }
+    else {
+        self.actionBarButtonItem.enabled = !self.self.webView.isLoading;
+    }
     
     UIBarButtonItem *refreshStopBarButtonItem = self.self.webView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
@@ -263,8 +298,14 @@
 
 - (void)actionButtonClicked:(id)sender {
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
+    UIActivityViewController *activityController;
     
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
+    if ([[self.self.webView.request.URL path] isEqualToString:self.tempFilePath]) {  //&& self.customURL != NULL
+        activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.customURL] applicationActivities:activities];
+    }
+    else {
+        activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
+    }
     [self presentViewController:activityController animated:YES completion:nil];
 }
 

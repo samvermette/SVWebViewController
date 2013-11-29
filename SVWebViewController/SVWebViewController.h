@@ -12,5 +12,7 @@
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithHTMLString:(NSString*)HTMLString;
+- (id)initWithHTMLString:(NSString*)HTMLString customURL:(NSURL*)URL;
 
 @end
