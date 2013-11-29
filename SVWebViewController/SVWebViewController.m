@@ -20,7 +20,7 @@
 
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
-@property (nonatomic, strong) NSURL *tempFilePath;
+@property (nonatomic, strong) NSString *tempFilePath;
 @property (nonatomic, strong) NSURL *customURL;
 
 - (id)initWithAddress:(NSString*)urlString;
@@ -67,10 +67,11 @@
     
     if(self = [super init]) {
         NSURL *tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
-        self.tempFilePath = [[tmpDirURL URLByAppendingPathComponent:@"SVWebTemp"] URLByAppendingPathExtension:@"html"];
+        NSURL *filePath = [[tmpDirURL URLByAppendingPathComponent:@"SVWebTemp"] URLByAppendingPathExtension:@"html"];
+        self.tempFilePath = [filePath path];
         
-        [pageHTMLString writeToFile:[self.tempFilePath path] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-        self.URL = self.tempFilePath;
+        [pageHTMLString writeToFile:self.tempFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        self.URL = [NSURL URLWithString:self.tempFilePath];
     }
     
     return self;
@@ -203,7 +204,7 @@
     self.backBarButtonItem.enabled = self.self.webView.canGoBack;
     self.forwardBarButtonItem.enabled = self.self.webView.canGoForward;
     
-    if ([self.self.webView.request.URL isEqual:self.tempFilePath] && self.customURL == NULL) {
+    if ([[self.self.webView.request.URL path] isEqualToString:self.tempFilePath] && self.customURL == NULL) {
         self.actionBarButtonItem.enabled = FALSE; //
     }
     else {
@@ -299,7 +300,7 @@
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
     UIActivityViewController *activityController;
     
-    if ([self.self.webView.request.URL isEqual:self.tempFilePath]) {  //&& self.customURL != NULL
+    if ([[self.self.webView.request.URL path] isEqualToString:self.tempFilePath]) {  //&& self.customURL != NULL
         activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.customURL] applicationActivities:activities];
     }
     else {
