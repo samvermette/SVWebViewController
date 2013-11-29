@@ -69,9 +69,9 @@
         NSURL *tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
         NSURL *filePath = [[tmpDirURL URLByAppendingPathComponent:@"SVWebTemp"] URLByAppendingPathExtension:@"html"];
         self.tempFilePath = [filePath path];
-        
         [pageHTMLString writeToFile:self.tempFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-        self.URL = [NSURL URLWithString:self.tempFilePath];
+        
+        self.URL = filePath;
     }
     
     return self;
