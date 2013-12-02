@@ -41,7 +41,10 @@
 #pragma mark - Initialization
 
 - (void)dealloc {
-    [self.webView stopLoading];
+//    [self.webView stopLoading];
+    [self.webView loadRequest:
+     [NSURLRequest requestWithURL:
+      [NSURL URLWithString: @"about:blank"]]];
  	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     self.webView.delegate = nil;
 }
@@ -269,6 +272,10 @@
 }
 
 - (void)doneButtonClicked:(id)sender {
+    [self.webView loadRequest:
+     [NSURLRequest requestWithURL:
+      [NSURL URLWithString: @"about:blank"]]];
+
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
 
