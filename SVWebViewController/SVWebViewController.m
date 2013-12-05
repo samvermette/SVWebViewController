@@ -38,11 +38,13 @@
 
 @implementation SVWebViewController
 
+@synthesize customSetNetworkActivityIndicatorVisible = _customSetNetworkActivityIndicatorVisible;
+
 #pragma mark - Initialization
 
 - (void)dealloc {
     [self.webView stopLoading];
- 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [self setNetworkActivityIndicatorVisible:NO];
     self.webView.delegate = nil;
 }
 
@@ -61,6 +63,16 @@
 
 - (void)loadURL:(NSURL *)pageURL {
     [self.webView loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+- (void)setNetworkActivityIndicatorVisible:(BOOL) networkActivityIndicatorVisible
+{
+    if (self.customSetNetworkActivityIndicatorVisible != nil) {
+        self.customSetNetworkActivityIndicatorVisible(networkActivityIndicatorVisible);
+        return;
+    }
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:networkActivityIndicatorVisible];
 }
 
 #pragma mark - View lifecycle
@@ -105,7 +117,7 @@
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [self setNetworkActivityIndicatorVisible:NO];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
@@ -225,20 +237,20 @@
 #pragma mark - UIWebViewDelegate
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    [self setNetworkActivityIndicatorVisible:YES];
     [self updateToolbarItems];
 }
 
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [self setNetworkActivityIndicatorVisible:NO];
     
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [self setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
 }
 

@@ -10,7 +10,11 @@
 
 @class SVWebViewController;
 
-@interface SVModalWebViewController : UINavigationController
+@interface SVModalWebViewController : UINavigationController {
+    void(^_customSetNetworkActivityIndicatorVisible)(BOOL networkActivityIndicatorVisible);
+}
+
+@property (nonatomic, copy) void(^customSetNetworkActivityIndicatorVisible)(BOOL networkActivityIndicatorVisible);
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL *)URL;
