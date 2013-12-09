@@ -18,8 +18,9 @@
 @property (nonatomic, strong) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong) UIBarButtonItem *actionBarButtonItem;
 
-@property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
+
+@property (nonatomic) NSUInteger webViewLoads;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
@@ -41,12 +42,22 @@
 #pragma mark - Initialization
 
 - (void)dealloc {
-//    [self.webView stopLoading];
-    [self.webView loadRequest:
-     [NSURLRequest requestWithURL:
-      [NSURL URLWithString: @"about:blank"]]];
- 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    self.webView.delegate = nil;
+
+    UIWebView *wv = self.webView;
+
+    [wv stopLoading];
+
+    [NSOperationQueue.mainQueue addOperationWithBlock: ^{
+
+        [wv loadRequest:
+         [NSURLRequest requestWithURL: [NSURL URLWithString: @"about:blank"]]];
+    }];
+    if (!self.delegate) {
+
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    }
+    wv.delegate = nil;
+    self.delegate = nil;
 }
 
 - (id)initWithAddress:(NSString *)urlString {
@@ -96,6 +107,22 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:NO animated:animated];
     }
+    id<SVWebViewControllerDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webViewControllerWillAppear:)]) {
+
+        [delegate webViewControllerWillAppear: self];
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+
+    id<SVWebViewControllerDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webViewControllerDidAppear:)]) {
+
+        [delegate webViewControllerDidAppear: self];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -104,11 +131,27 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
+    id<SVWebViewControllerDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webViewControllerWillDisappear:)]) {
+
+        [delegate webViewControllerWillDisappear: self];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+
+    id<SVWebViewControllerDelegate> delegate = self.delegate;
+
+    if (!delegate) {
+
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    }
+    else if ([delegate respondsToSelector: @selector(webViewControllerDidDisappear:)]) {
+
+        [delegate webViewControllerDidDisappear: self];
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
@@ -177,13 +220,13 @@
 - (void)updateToolbarItems {
     self.backBarButtonItem.enabled = self.webView.canGoBack;
     self.forwardBarButtonItem.enabled = self.webView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.webView.isLoading;
-    
-    UIBarButtonItem *refreshStopBarButtonItem = self.webView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
-    
+    self.actionBarButtonItem.enabled = !self.webViewLoads;
+
+    UIBarButtonItem *refreshStopBarButtonItem = self.webViewLoads ? self.stopBarButtonItem : self.refreshBarButtonItem;
+
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         CGFloat toolbarWidth = 250.0f;
         fixedSpace.width = 35.0f;
@@ -198,14 +241,14 @@
                           fixedSpace,
                           self.actionBarButtonItem,
                           nil];
-        
+
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
         toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItems = items.reverseObjectEnumerator.allObjects;
     }
-    
+
     else {
         NSArray *items = [NSArray arrayWithObjects:
                           fixedSpace,
@@ -218,7 +261,7 @@
                           self.actionBarButtonItem,
                           fixedSpace,
                           nil];
-        
+
         self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
@@ -227,22 +270,59 @@
 
 #pragma mark - UIWebViewDelegate
 
-- (void)webViewDidStartLoad:(UIWebView *)webView {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    [self updateToolbarItems];
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+
+    id<UIWebViewDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
+
+        return [delegate webView: webView shouldStartLoadWithRequest: request navigationType: navigationType];
+    }
+    return YES;
 }
 
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+
+    self.webViewLoads++;
+    [self updateToolbarItems];
+
+    id<UIWebViewDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webViewDidStartLoad:)]) {
+
+        [delegate webViewDidStartLoad: webView];
+    }
+    else { [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES]; }
+}
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
+
+    self.webViewLoads = self.webViewLoads ? --self.webViewLoads : 0;
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+
     [self updateToolbarItems];
+
+    id<UIWebViewDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webViewDidFinishLoad:)]) {
+
+        [delegate webViewDidFinishLoad: webView];
+    }
+    else { [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO]; }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+
+    self.webViewLoads = self.webViewLoads ? --self.webViewLoads : 0;
     [self updateToolbarItems];
+
+    id<UIWebViewDelegate> delegate = self.delegate;
+
+    if ([delegate respondsToSelector: @selector(webView:didFailLoadWithError:)]) {
+
+        [delegate webView: webView didFailLoadWithError: error];
+    }
+    else { [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO]; }
 }
 
 #pragma mark - Target actions
@@ -256,12 +336,15 @@
 }
 
 - (void)reloadClicked:(UIBarButtonItem *)sender {
+    self.webViewLoads = 0;
     [self.webView reload];
+    [self updateToolbarItems];
 }
 
 - (void)stopClicked:(UIBarButtonItem *)sender {
+    self.webViewLoads = 0;
     [self.webView stopLoading];
-	[self updateToolbarItems];
+    [self updateToolbarItems];
 }
 
 - (void)actionButtonClicked:(id)sender {
@@ -272,10 +355,7 @@
 }
 
 - (void)doneButtonClicked:(id)sender {
-    [self.webView loadRequest:
-     [NSURLRequest requestWithURL:
-      [NSURL URLWithString: @"about:blank"]]];
-
+    [self.webView stopLoading];
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
 
