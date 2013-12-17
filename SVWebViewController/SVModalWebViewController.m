@@ -30,7 +30,7 @@
     if (self = [super initWithRootViewController:self.webViewController]) {
         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                     target:self.webViewController
-                                                                                    action:@selector(doneButtonClicked:)];
+                                                                                    action:kDoneButtonClicked];
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
             self.webViewController.navigationItem.leftBarButtonItem = doneButton;

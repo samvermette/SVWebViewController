@@ -28,4 +28,7 @@
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
+#define kDoneButtonClicked  (@selector(doneButtonClicked:))
+- (void) doneButtonClicked: (id) sender;
+
 @end
