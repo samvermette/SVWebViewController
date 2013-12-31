@@ -87,7 +87,7 @@
     self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     self.activityIndicator.frame = self.view.frame;
     [self.view addSubview:self.activityIndicator];
-    
+    [self.activityIndicator startAnimating];
     if(self.URL && !self.isRawHTML){
         [self loadURL:self.URL];
     }
@@ -253,7 +253,6 @@
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    [self.activityIndicator startAnimating];
     [self updateToolbarItems];
 }
 
