@@ -20,9 +20,12 @@
 
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, strong) NSString *htmlString;
+@property  BOOL isRawHTML;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithHTMLString:(NSString*)htmlString andBaseURL:(NSURL*)baseURL;
 - (void)loadURL:(NSURL*)URL;
 
 - (void)updateToolbarItems;
@@ -54,6 +57,18 @@
     
     if(self = [super init]) {
         self.URL = pageURL;
+        self.isRawHTML = NO;
+    }
+    
+    return self;
+}
+
+- (id)initWithHTMLString:(NSString*)htmlString andBaseURL:(NSURL*)baseURL{
+    
+    if(self = [super init]) {
+        self.htmlString = htmlString;
+        self.URL = baseURL;
+        self.isRawHTML = YES;
     }
     
     return self;
@@ -67,7 +82,12 @@
 
 - (void)loadView {
     self.view = self.webView;
-    [self loadURL:self.URL];
+    if(self.URL && !self.isRawHTML){
+        [self loadURL:self.URL];
+    }
+    else if(self.htmlString && self.isRawHTML){
+        [self.webView loadHTMLString:self.htmlString baseURL:self.URL];
+    }
 }
 
 - (void)viewDidLoad {
