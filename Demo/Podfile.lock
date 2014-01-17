@@ -1,0 +1,14 @@
+PODS:
+  - SVWebViewController (1.0)
+
+DEPENDENCIES:
+  - SVWebViewController (from `https://github.com/pilot34/SVWebViewController.git`)
+
+EXTERNAL SOURCES:
+  SVWebViewController:
+    :git: https://github.com/pilot34/SVWebViewController.git
+
+SPEC CHECKSUMS:
+  SVWebViewController: e576371f7015bce92c97c304c32336700064847b
+
+COCOAPODS: 0.29.0

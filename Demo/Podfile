@@ -1,0 +1,2 @@
+platform :ios, '6.0'
+pod 'SVWebViewController', :git => 'https://github.com/pilot34/SVWebViewController.git'
