@@ -10,8 +10,9 @@
 #import "SVWebViewControllerActivitySafari.h"
 #import "SVWebViewController.h"
 #import "NJKWebViewProgressView.h"
+#import "NJKWebViewProgress.h"
 
-@interface SVWebViewController () <UIWebViewDelegate>
+@interface SVWebViewController () <UIWebViewDelegate, NJKWebViewProgressDelegate>
 
 @property (nonatomic, strong) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong) UIBarButtonItem *forwardBarButtonItem;

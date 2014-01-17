@@ -1,5 +1,11 @@
 PODS:
-  - SVWebViewController (1.0)
+  - NJKWebViewProgress (0.2):
+    - NJKWebViewProgress/Core
+    - NJKWebViewProgress/ProgressView
+  - NJKWebViewProgress/Core (0.2)
+  - NJKWebViewProgress/ProgressView (0.2)
+  - SVWebViewController (1.0):
+    - NJKWebViewProgress
 
 DEPENDENCIES:
   - SVWebViewController (from `https://github.com/pilot34/SVWebViewController.git`)
@@ -9,6 +15,7 @@ EXTERNAL SOURCES:
     :git: https://github.com/pilot34/SVWebViewController.git
 
 SPEC CHECKSUMS:
-  SVWebViewController: e576371f7015bce92c97c304c32336700064847b
+  NJKWebViewProgress: fd46c9489d799d97f3b09210886bf83884f6c725
+  SVWebViewController: d36c892657f24b9eb8ae39795e7619ce79f7fe94
 
 COCOAPODS: 0.29.0
