@@ -10,5 +10,5 @@ Pod::Spec.new do |s|
   s.source_files 	= 'SVWebViewController/**/*.{h,m}'
   s.resources 		= 'SVWebViewController/**/*.{bundle,png}'
   s.requires_arc 	= true
-  s.dependecy    = 'NJKWebViewProgress'
+  s.dependency 'NJKWebViewProgress'
 end
