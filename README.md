@@ -10,6 +10,7 @@ SVWebViewController is a simple inline browser for your iOS 7 app.
 * full landscape orientation support
 * back, forward, stop/refresh and share buttons
 * Open in Safari and Chrome UIActivities
+* Send by mail
 * navbar title set to the currently visible web page
 * talks with `setNetworkActivityIndicatorVisible`
 
@@ -23,6 +24,7 @@ I'm not a big fan of CocoaPods, so tend to not keep it updated. If you really wa
 
 * Drag the `SVWebViewController/SVWebViewController` folder into your project.
 * `#import "SVWebViewController.h"`
+* Add `MessageUI.framework`
 
 ## Usage
 

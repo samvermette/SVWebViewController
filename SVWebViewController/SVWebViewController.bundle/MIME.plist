@@ -1,0 +1,14 @@
+{
+    "ps" = "application/postscript";
+    "pdf" = "application/pdf";
+    "txt" = "text/plain";
+
+    "gif" = "image/gif";
+    "jpg" = "image/jpeg";
+    "jpe" = "image/jpeg";
+    "jpeg" = "image/jpeg";
+    "ief" = "image/ief";
+    "png" = "image/png";
+    "tif" = "image/tiff";
+    "tiff" = "image/tiff";
+}

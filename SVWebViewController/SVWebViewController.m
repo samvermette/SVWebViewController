@@ -9,6 +9,7 @@
 #import "SVWebViewControllerActivityChrome.h"
 #import "SVWebViewControllerActivitySafari.h"
 #import "SVWebViewController.h"
+#import "SVWebViewControllerActivityMail.h"
 
 @interface SVWebViewController () <UIWebViewDelegate>
 
@@ -262,7 +263,8 @@
 }
 
 - (void)actionButtonClicked:(id)sender {
-    NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
+    SVWebViewControllerActivityMail *activityMail = [[SVWebViewControllerActivityMail alloc] initWithWebView:self.webView];
+    NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new], activityMail];
     
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
     [self presentViewController:activityController animated:YES completion:nil];
