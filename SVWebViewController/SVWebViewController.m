@@ -227,6 +227,9 @@
         toolbar.items = items;
         toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        if([self.navigationController.toolbar respondsToSelector:@selector(barTintColor)]){
+            self.navigationController.toolbar.barTintColor = self.navigationController.navigationBar.barTintColor;
+        }
         self.navigationItem.rightBarButtonItems = items.reverseObjectEnumerator.allObjects;
     }
     
@@ -244,7 +247,10 @@
                           nil];
         
         self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;        
+        if([self.navigationController.toolbar respondsToSelector:@selector(barTintColor)]){
+            self.navigationController.toolbar.barTintColor = self.navigationController.navigationBar.barTintColor;
+        }
         self.toolbarItems = items;
     }
 }
