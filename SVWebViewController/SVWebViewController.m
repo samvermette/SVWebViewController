@@ -300,7 +300,10 @@
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
     
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
-    [self presentViewController:activityController animated:YES completion:nil];
+    
+    //a fix to accomodate more complicated view structures
+    [self.view.window.rootViewController presentViewController:activityController animated:YES completion:nil];
+
 }
 
 - (void)doneButtonClicked:(id)sender {
