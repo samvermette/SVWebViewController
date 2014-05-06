@@ -60,7 +60,7 @@
 }
 
 - (void)loadURL:(NSURL *)pageURL {
-    [self.webView loadRequest:[NSURLRequest requestWithURL:pageURL]];
+    [self.webView loadHTMLString:@"<html><body></body></html>" baseURL:nil];
 }
 
 #pragma mark - View lifecycle
@@ -232,6 +232,10 @@
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    if ([webView.request.URL.absoluteString isEqualToString:@"about:blank"]) {
+        [self.webView loadRequest:[NSURLRequest requestWithURL:self.URL]];
+        return;
+    }
     
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
