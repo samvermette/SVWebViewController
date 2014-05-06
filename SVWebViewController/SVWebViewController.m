@@ -20,10 +20,14 @@
 
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
+@property (nonatomic, strong) NSURL *baseUrl;
+@property (nonatomic, strong) NSString *htmlString;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
+- (id)initWithHTMLString:(NSString *)string andBaseUrl:(NSURL *)baseUrl;
 - (void)loadURL:(NSURL*)URL;
+- (void)loadHTMLString:(NSString *)string;
 
 - (void)updateToolbarItems;
 
@@ -59,15 +63,31 @@
     return self;
 }
 
+- (id)initWithHTMLString:(NSString *)htmlString andBaseUrl:(NSURL *)baseUrl {
+    if (self = [super init])
+    {
+        self.baseUrl = baseUrl;
+        self.htmlString = htmlString;
+    }
+    return self;
+}
+
 - (void)loadURL:(NSURL *)pageURL {
     [self.webView loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+- (void)loadHTMLString:(NSString *)string andBaseUrl:(NSURL *)baseUrl{
+    [self.webView loadHTMLString:string baseURL:baseUrl];
 }
 
 #pragma mark - View lifecycle
 
 - (void)loadView {
     self.view = self.webView;
-    [self loadURL:self.URL];
+    if (self.htmlString)
+        [self loadHTMLString:self.htmlString andBaseUrl:self.baseUrl];
+    else
+        [self loadURL:self.URL];
 }
 
 - (void)viewDidLoad {

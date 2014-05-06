@@ -11,10 +11,11 @@
 
 @interface SVModalWebViewController ()
 
+- (void) initializeDoneButton;
+
 @property (nonatomic, strong) SVWebViewController *webViewController;
 
 @end
-
 
 @implementation SVModalWebViewController
 
@@ -28,16 +29,27 @@
 - (id)initWithURL:(NSURL *)URL {
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
     if (self = [super initWithRootViewController:self.webViewController]) {
-        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                                    target:self.webViewController
-                                                                                    action:@selector(doneButtonClicked:)];
-        
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-            self.webViewController.navigationItem.leftBarButtonItem = doneButton;
-        else
-            self.webViewController.navigationItem.rightBarButtonItem = doneButton;
+        [self initializeDoneButton];
     }
     return self;
+}
+
+- (id)initWithHTMLString:(NSString *)htmlString andBaseUrl:(NSURL *)baseUrl {
+    self.webViewController = [[SVWebViewController alloc] initWithHTMLString:htmlString andBaseUrl:baseUrl];
+    if (self = [super initWithRootViewController:self.webViewController]) {
+        [self initializeDoneButton];
+    }
+    return self;
+}
+
+- (void) initializeDoneButton {
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                target:self.webViewController
+                                                                                action:@selector(doneButtonClicked:)];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+        self.webViewController.navigationItem.leftBarButtonItem = doneButton;
+    else
+        self.webViewController.navigationItem.rightBarButtonItem = doneButton;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
