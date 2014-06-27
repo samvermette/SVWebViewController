@@ -79,41 +79,69 @@
 
 #pragma mark - View lifecycle
 
-- (void)loadView {
-    self.view = self.webView;
-    [self loadURL:self.URL];
-}
+- (void) loadView {
 
-- (void)viewDidLoad {
+    UIView *view = [UIView.alloc initWithFrame: UIScreen.mainScreen.bounds];
+
+    view.backgroundColor = UIColor.blackColor;
+    
+    self.view = view;
+
+} // -loadView
+
+- (void) viewDidLoad {
+
 	[super viewDidLoad];
+
     [self updateToolbarItems];
-}
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    self.webView = nil;
-    _backBarButtonItem = nil;
-    _forwardBarButtonItem = nil;
-    _refreshBarButtonItem = nil;
-    _stopBarButtonItem = nil;
-    _actionBarButtonItem = nil;
-}
+} // -viewDidLoad
 
-- (void)viewWillAppear:(BOOL)animated {
+
+//- (void)viewDidUnload {
+//    [super viewDidUnload];
+//    self.webView = nil;
+//    _backBarButtonItem = nil;
+//    _forwardBarButtonItem = nil;
+//    _refreshBarButtonItem = nil;
+//    _stopBarButtonItem = nil;
+//    _actionBarButtonItem = nil;
+//}
+
+- (void) viewWillAppear: (BOOL) animated {
+
     NSAssert(self.navigationController, @"SVWebViewController needs to be contained in a UINavigationController. If you are presenting SVWebViewController modally, use SVModalWebViewController instead.");
     
 	[super viewWillAppear:animated];
 	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.navigationController setToolbarHidden:NO animated:animated];
+        [self.navigationController setToolbarHidden: NO animated: animated];
     }
+    self.navigationController.view.backgroundColor = UIColor.clearColor;
+    
+    UIWebView *wv = self.webView;
+
+//    CGRect frame = self.view.bounds;
+//    CGFloat height = self.navigationController.navigationBar.bounds.size.height;
+//
+//    frame.origin.y += height;
+//    frame.size.height -= height;
+//
+    wv.frame = self.view.bounds;
+
+    [self.view addSubview: wv];
+    [self loadURL:self.URL];
+
+    wv.scrollView.backgroundColor = UIColor.clearColor;
+
     id<SVWebViewControllerDelegate> delegate = self.delegate;
 
     if ([delegate respondsToSelector: @selector(webViewControllerWillAppear:)]) {
 
         [delegate webViewControllerWillAppear: self];
     }
-}
+
+} // -viewWillAppear:
 
 - (void)viewDidAppear:(BOOL)animated {
 
@@ -161,16 +189,21 @@
     return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
 }
 
+
 #pragma mark - Getters
 
-- (UIWebView*)webView {
+
+- (UIWebView *) webView {
+
     if(!_webView) {
-        _webView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        _webView = [UIWebView.alloc initWithFrame: self.view.bounds];
         _webView.delegate = self;
         _webView.scalesPageToFit = YES;
     }
     return _webView;
-}
+
+} // -webView
+
 
 - (UIBarButtonItem *)backBarButtonItem {
     if (!_backBarButtonItem) {
@@ -217,7 +250,9 @@
 
 #pragma mark - Toolbar
 
-- (void)updateToolbarItems {
+
+- (void) updateToolbarItems {
+
     self.backBarButtonItem.enabled = self.webView.canGoBack;
     self.forwardBarButtonItem.enabled = self.webView.canGoForward;
     self.actionBarButtonItem.enabled = !self.webViewLoads;
@@ -228,7 +263,7 @@
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        CGFloat toolbarWidth = 250.0f;
+
         fixedSpace.width = 35.0f;
 
         NSArray *items = [NSArray arrayWithObjects:
@@ -241,15 +276,10 @@
                           fixedSpace,
                           self.actionBarButtonItem,
                           nil];
-
-        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
-        toolbar.items = items;
-        toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-        toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItems = items.reverseObjectEnumerator.allObjects;
     }
-
     else {
+
         NSArray *items = [NSArray arrayWithObjects:
                           fixedSpace,
                           self.backBarButtonItem,
@@ -261,12 +291,13 @@
                           self.actionBarButtonItem,
                           fixedSpace,
                           nil];
-
-        self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+//        self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+//        self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
     }
-}
+
+} // -updateToolbarItems
+
 
 #pragma mark - UIWebViewDelegate
 
@@ -347,12 +378,42 @@
     [self updateToolbarItems];
 }
 
-- (void)actionButtonClicked:(id)sender {
-    NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
+- (void) actionButtonClicked: (UIBarButtonItem *) sender {
+
+    NSArray *activities = @[SVWebViewControllerActivitySafari.new,
+                            SVWebViewControllerActivityChrome.new];
     
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.webView.request.URL] applicationActivities:activities];
-    [self presentViewController:activityController animated:YES completion:nil];
-}
+    UIActivityViewController *avc = nil;
+
+    avc = [UIActivityViewController.alloc
+           initWithActivityItems: @[self.webView.request.URL]
+           applicationActivities:activities];
+
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+
+        UIPopoverController *pc = nil;
+
+        pc = [UIPopoverController.alloc initWithContentViewController: avc];
+
+        pc.popoverContentSize = avc.preferredContentSize;
+
+        [pc presentPopoverFromBarButtonItem: sender
+                   permittedArrowDirections: UIPopoverArrowDirectionAny
+                                   animated: YES];
+        avc.completionHandler = ^(NSString *activityType, BOOL completed) {
+
+            [pc dismissPopoverAnimated: YES];
+        };
+    }
+    else {
+
+        [self.navigationController presentViewController: avc
+                                                animated: YES
+                                              completion: NULL];
+    }
+
+} // -actionButtonClicked:
+
 
 - (void)doneButtonClicked:(id)sender {
     [self.webView stopLoading];

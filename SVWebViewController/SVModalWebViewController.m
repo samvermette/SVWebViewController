@@ -47,4 +47,15 @@
     self.navigationBar.tintColor = self.barsTintColor;
 }
 
+
+#pragma mark - UIToolbarDelegate methods.
+
+
+- (UIBarPosition) positionForBar: (id<UIBarPositioning>) bar {
+
+    return self.isBarAttached ? UIBarPositionTopAttached : UIBarPositionTop;
+
+} // -positionForBar:
+
+
 @end

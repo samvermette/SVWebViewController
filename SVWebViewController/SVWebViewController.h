@@ -6,19 +6,7 @@
 //
 //  https://github.com/samvermette/SVWebViewController
 
-#import "SVModalWebViewController.h"
-
-@protocol SVWebViewControllerDelegate <NSObject>
-
-@optional
-
-- (void) webViewControllerWillAppear: (SVWebViewController *) wvc;
-- (void) webViewControllerDidAppear:  (SVWebViewController *) wvc;
-
-- (void) webViewControllerWillDisappear: (SVWebViewController *) wvc;
-- (void) webViewControllerDidDisappear:  (SVWebViewController *) wvc;
-
-@end
+@protocol SVWebViewControllerDelegate;
 
 @interface SVWebViewController : UIViewController
 
@@ -30,5 +18,17 @@
 
 #define kDoneButtonClicked  (@selector(doneButtonClicked:))
 - (void) doneButtonClicked: (id) sender;
+
+@end
+
+@protocol SVWebViewControllerDelegate <NSObject>
+
+@optional
+
+- (void) webViewControllerWillAppear: (SVWebViewController *) wvc;
+- (void) webViewControllerDidAppear:  (SVWebViewController *) wvc;
+
+- (void) webViewControllerWillDisappear: (SVWebViewController *) wvc;
+- (void) webViewControllerDidDisappear:  (SVWebViewController *) wvc;
 
 @end
