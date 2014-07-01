@@ -7,11 +7,13 @@
 //  https://github.com/samvermette/SVWebViewController
 
 @protocol SVWebViewControllerDelegate;
+@protocol SVWebViewPresenter <UIWebViewDelegate, SVWebViewControllerDelegate>
+@end
 
 @interface SVWebViewController : UIViewController
 
-@property (nonatomic, strong) UIWebView *webView;
-@property (weak, nonatomic) id<UIWebViewDelegate, SVWebViewControllerDelegate> delegate;
+@property (nonatomic) UIWebView *webView;
+@property (weak, nonatomic) id<SVWebViewPresenter> delegate;
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
