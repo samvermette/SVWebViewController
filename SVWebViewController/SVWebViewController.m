@@ -262,12 +262,11 @@
 
 - (void)actionButtonClicked:(id)sender {
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
-
     NSURL *url = self.webView.request.URL;
-    if (!url || [[url absoluteString] isEqualToString:@""]) {
-        url = self.URL;
-    }
-    if ([[url absoluteString] hasPrefix:@"file:///"]) {
+    if (!url) url = self.URL;
+    if (!url) return;   // self.URL could still be nil
+    
+    if ([[url absoluteString] hasPrefix:@"file://"]) {
         UIDocumentInteractionController *dc = [UIDocumentInteractionController interactionControllerWithURL:url];
         [dc presentOptionsMenuFromRect:self.view.bounds inView:self.view animated:YES];
     } else {
