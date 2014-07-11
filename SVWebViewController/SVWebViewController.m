@@ -172,11 +172,10 @@
 #pragma mark - Toolbar
 
 - (void)updateToolbarItems {
-    self.backBarButtonItem.enabled = self.self.webView.canGoBack;
-    self.forwardBarButtonItem.enabled = self.self.webView.canGoForward;
-    self.actionBarButtonItem.enabled = !self.self.webView.isLoading;
-    
-    UIBarButtonItem *refreshStopBarButtonItem = self.self.webView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
+    self.backBarButtonItem.enabled = self.webView.canGoBack;
+    self.forwardBarButtonItem.enabled = self.webView.canGoForward;
+
+    UIBarButtonItem *refreshStopBarButtonItem = self.webView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
     
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
@@ -233,7 +232,7 @@
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
-    self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    self.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     [self updateToolbarItems];
 }
 
@@ -263,9 +262,17 @@
 
 - (void)actionButtonClicked:(id)sender {
     NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
-    NSURL *url = self.webView.request.URL ? self.webView.request.URL : self.URL;
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:activities];
-    [self presentViewController:activityController animated:YES completion:nil];
+    NSURL *url = self.webView.request.URL;
+    if (!url) url = self.URL;
+    if (!url) return;   // self.URL could still be nil
+    
+    if ([[url absoluteString] hasPrefix:@"file://"]) {
+        UIDocumentInteractionController *dc = [UIDocumentInteractionController interactionControllerWithURL:url];
+        [dc presentOptionsMenuFromRect:self.view.bounds inView:self.view animated:YES];
+    } else {
+        UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:activities];
+        [self presentViewController:activityController animated:YES completion:nil];
+    }
 }
 
 - (void)doneButtonClicked:(id)sender {
