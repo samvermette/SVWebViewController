@@ -24,6 +24,8 @@
 
 @implementation SVModalWebViewController
 
+@synthesize customSetNetworkActivityIndicatorVisible = _customSetNetworkActivityIndicatorVisible;
+
 #pragma mark - Initialization
 
 
@@ -55,6 +57,14 @@
     
     self.webViewController.title = self.title;
     self.navigationBar.tintColor = self.barsTintColor;
+}
+
+#pragma mark - Accessors
+-(void) setCustomSetNetworkActivityIndicatorVisible:(void (^)(BOOL))customSetNetworkActivityIndicatorVisible
+{
+    _customSetNetworkActivityIndicatorVisible = customSetNetworkActivityIndicatorVisible;
+    
+    self.webViewController.customSetNetworkActivityIndicatorVisible = customSetNetworkActivityIndicatorVisible;
 }
 
 @end

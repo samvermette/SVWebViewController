@@ -8,7 +8,11 @@
 
 #import "SVModalWebViewController.h"
 
-@interface SVWebViewController : UIViewController
+@interface SVWebViewController : UIViewController {
+    void(^_customSetNetworkActivityIndicatorVisible)(BOOL networkActivityIndicatorVisible);
+}
+
+@property (copy) void(^customSetNetworkActivityIndicatorVisible)(BOOL networkActivityIndicatorVisible);
 
 - (instancetype)initWithAddress:(NSString*)urlString;
 - (instancetype)initWithURL:(NSURL*)URL;
