@@ -1,0 +1,3 @@
+[submodule "SVWebViewController/vendors/OpenInChromeController"]
+	path = SVWebViewController/vendors/OpenInChromeController
+	url = https://github.com/GoogleChrome/OpenInChrome.git
