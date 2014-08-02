@@ -7,32 +7,37 @@
 //  https://github.com/samvermette/SVWebViewController
 
 #import "SVWebViewControllerActivityChrome.h"
+#import "OpenInChromeController.h"
 
 @implementation SVWebViewControllerActivityChrome
-
-- (NSString *)schemePrefix {
-    return @"googlechrome://";
-}
 
 - (NSString *)activityTitle {
 	return NSLocalizedStringFromTable(@"Open in Chrome", @"SVWebViewController", nil);
 }
 
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems {
-	for (id activityItem in activityItems) {
-		if ([activityItem isKindOfClass:[NSURL class]] && [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:self.schemePrefix]]) {
-			return YES;
-		}
-	}
+
+    if ([[OpenInChromeController sharedInstance] isChromeInstalled]) {
+
+        for (NSURL *url in activityItems) {
+
+            if ([url isKindOfClass:[NSURL class]]) {
+
+                NSString *scheme = url.scheme;
+
+                return ([scheme isEqualToString: @"http"] ||
+                        [scheme isEqualToString: @"https"]);
+            }
+        }
+    }
 	return NO;
 }
 
 - (void)performActivity {
-    NSString *openingURL = [self.URLToOpen.absoluteString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSURL *activityURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", self.schemePrefix, openingURL]];
-	[[UIApplication sharedApplication] openURL:activityURL];
-    
-	[self activityDidFinish:YES];
+
+    [[OpenInChromeController sharedInstance] openInChrome: self.URLToOpen];
+
+	[self activityDidFinish: YES];
 }
 
 @end
