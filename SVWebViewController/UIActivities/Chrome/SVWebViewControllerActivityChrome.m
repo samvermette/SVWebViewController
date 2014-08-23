@@ -15,29 +15,35 @@
 	return NSLocalizedStringFromTable(@"Open in Chrome", @"SVWebViewController", nil);
 }
 
-- (BOOL)canPerformWithActivityItems:(NSArray *)activityItems {
+- (BOOL) canPerformWithActivityItems: (NSArray *) activityItems {
 
     if ([[OpenInChromeController sharedInstance] isChromeInstalled]) {
 
+        BOOL canPerform = NO;
+        
         for (NSURL *url in activityItems) {
 
             if ([url isKindOfClass:[NSURL class]]) {
 
                 NSString *scheme = url.scheme;
 
-                return ([scheme isEqualToString: @"http"] ||
-                        [scheme isEqualToString: @"https"]);
+                canPerform |= ([scheme isEqualToString: @"http"] ||
+                               [scheme isEqualToString: @"https"]);
             }
         }
+        return canPerform;
     }
 	return NO;
-}
 
-- (void)performActivity {
+} // -canPerformWithActivityItems:
+
+
+- (void) performActivity {
 
     [[OpenInChromeController sharedInstance] openInChrome: self.URLToOpen];
 
 	[self activityDidFinish: YES];
-}
+
+} // -performActivity
 
 @end

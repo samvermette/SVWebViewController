@@ -15,14 +15,25 @@
 	return NSLocalizedStringFromTable(@"Open in Safari", @"SVWebViewController", nil);
 }
 
-- (BOOL)canPerformWithActivityItems:(NSArray *)activityItems {
-	for (id activityItem in activityItems) {
-		if ([activityItem isKindOfClass:[NSURL class]] && [[UIApplication sharedApplication] canOpenURL:activityItem]) {
-			return YES;
-		}
-	}
-	return NO;
-}
+- (BOOL) canPerformWithActivityItems: (NSArray *) activityItems {
+
+    BOOL canPerform = NO;
+
+    for (NSURL *url in activityItems) {
+
+        if ([url isKindOfClass:[NSURL class]]) {
+
+            NSString *scheme = url.scheme;
+
+            canPerform |= (([scheme isEqualToString: @"http"] ||
+                            [scheme isEqualToString: @"https"]) &&
+                           [[UIApplication sharedApplication] canOpenURL: url]);
+        }
+    }
+	return canPerform;
+
+} // -canPerformWithActivityItems:
+
 
 - (void)performActivity {
 	BOOL completed = [[UIApplication sharedApplication] openURL:self.URLToOpen];
