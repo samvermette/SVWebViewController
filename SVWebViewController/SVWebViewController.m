@@ -18,7 +18,6 @@
 @property (nonatomic, strong) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong) UIBarButtonItem *actionBarButtonItem;
 
-@property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURL *URL;
 
 - (id)initWithAddress:(NSString*)urlString;
@@ -266,14 +265,19 @@
 }
 
 - (void)actionButtonClicked:(id)sender {
-    NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
-    
+    NSMutableArray *activities = @[].mutableCopy;
+    [activities addObject:[SVWebViewControllerActivitySafari new]];
+    [activities addObject:[SVWebViewControllerActivityChrome new]];
+    SVWebViewControllerActivity *weixinActivity = [NSClassFromString(@"HSUActivityWeixin") new];
+//    [weixinActivity performSelector:@selector(setShareTitle) withObject:self.navigationItem.title];
+    [weixinActivity performSelector:@selector(setShareDescription:) withObject:self.navigationItem.title];
+    SVWebViewControllerActivity *weixinMomentsActivity = [NSClassFromString(@"HSUActivityWeixinMoments") new];
+//    [weixinMomentsActivity performSelector:@selector(setShareTitle) withObject:self.navigationItem.title];
+    [weixinMomentsActivity performSelector:@selector(setShareDescription:) withObject:self.navigationItem.title];
+    [activities addObject:weixinActivity];
+    [activities addObject:weixinMomentsActivity];
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[self.self.webView.request.URL] applicationActivities:activities];
     [self presentViewController:activityController animated:YES completion:nil];
-}
-
-- (void)doneButtonClicked:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end

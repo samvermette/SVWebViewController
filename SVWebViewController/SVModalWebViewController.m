@@ -29,7 +29,7 @@
     self.webViewController = [[SVWebViewController alloc] initWithURL:URL];
     if (self = [super initWithRootViewController:self.webViewController]) {
         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                                    target:self.webViewController
+                                                                                    target:self
                                                                                     action:@selector(doneButtonClicked:)];
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
@@ -45,6 +45,11 @@
     
     self.webViewController.title = self.title;
     self.navigationBar.tintColor = self.barsTintColor;
+}
+
+- (void)doneButtonClicked:(id)sender
+{
+    [self.webViewController dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end

@@ -10,6 +10,8 @@
 
 @interface SVWebViewController : UIViewController
 
+@property (nonatomic, strong) UIWebView *webView;
+
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL*)URL;
 
