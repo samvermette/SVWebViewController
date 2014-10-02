@@ -122,7 +122,14 @@
 
 - (UIBarButtonItem *)backBarButtonItem {
     if (!_backBarButtonItem) {
-        _backBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"SVWebViewController.bundle/SVWebViewControllerBack"]
+        NSString *resourcePath =[[NSBundle bundleForClass:[self class]]resourcePath];
+        UIImage *image ;
+        if([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)] && ([UIScreen mainScreen].scale >= 2.0)){
+            image = [UIImage imageWithContentsOfFile:[resourcePath stringByAppendingPathComponent:@"SVWebViewController.bundle/SVWebViewControllerBack@2x.png"]];}
+        else{
+            image = [UIImage imageWithContentsOfFile:[resourcePath stringByAppendingPathComponent:@"SVWebViewController.bundle/SVWebViewControllerBack.png"]];}
+        
+        _backBarButtonItem = [[UIBarButtonItem alloc] initWithImage:image
                                                               style:UIBarButtonItemStylePlain
                                                              target:self
                                                              action:@selector(goBackTapped:)];
@@ -133,7 +140,14 @@
 
 - (UIBarButtonItem *)forwardBarButtonItem {
     if (!_forwardBarButtonItem) {
-        _forwardBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"SVWebViewController.bundle/SVWebViewControllerNext"]
+        NSString *resourcePath =[[NSBundle bundleForClass:[self class]]resourcePath];
+        UIImage *image ;
+        if([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)] && ([UIScreen mainScreen].scale >= 2.0)){
+            image = [UIImage imageWithContentsOfFile:[resourcePath stringByAppendingPathComponent:@"SVWebViewController.bundle/SVWebViewControllerNext@2x.png"]];
+        }else{
+            image = [UIImage imageWithContentsOfFile:[resourcePath stringByAppendingPathComponent:@"SVWebViewController.bundle/SVWebViewControllerNext.png"]];
+        }
+        _forwardBarButtonItem = [[UIBarButtonItem alloc] initWithImage:image
                                                                  style:UIBarButtonItemStylePlain
                                                                 target:self
                                                                 action:@selector(goForwardTapped:)];
