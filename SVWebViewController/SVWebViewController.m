@@ -415,9 +415,17 @@
 } // -actionButtonClicked:
 
 
-- (void)doneButtonClicked:(id)sender {
-    [self.webView stopLoading];
-    [self dismissViewControllerAnimated:YES completion:NULL];
-}
+- (void) doneButtonClicked: (id) sender {
+
+    [self.webView loadRequest:
+     [NSURLRequest requestWithURL:
+      [NSURL URLWithString: @"about:blank"]]];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+        [self dismissViewControllerAnimated:YES completion:NULL];
+    });
+
+} // -doneButtonClicked:
 
 @end
