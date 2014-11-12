@@ -12,6 +12,7 @@
 @interface SVModalWebViewController ()
 
 @property (nonatomic, strong) SVWebViewController *webViewController;
+@property (nonatomic, strong) UIBarButtonItem *doneButton;
 
 @end
 
@@ -38,14 +39,14 @@
 - (instancetype)initWithURLRequest:(NSURLRequest *)request {
     self.webViewController = [[SVWebViewController alloc] initWithURLRequest:request];
     if (self = [super initWithRootViewController:self.webViewController]) {
-        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+        self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                     target:self.webViewController
                                                                                     action:@selector(doneButtonTapped:)];
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-            self.webViewController.navigationItem.leftBarButtonItem = doneButton;
+            self.webViewController.navigationItem.leftBarButtonItem = self.doneButton;
         else
-            self.webViewController.navigationItem.rightBarButtonItem = doneButton;
+            self.webViewController.navigationItem.rightBarButtonItem = self.doneButton;
     }
     return self;
 }
@@ -55,6 +56,7 @@
     
     self.webViewController.title = self.title;
     self.navigationBar.tintColor = self.barsTintColor;
+    self.doneButton.tintColor = self.doneButtonTintColor;
 }
 
 @end
