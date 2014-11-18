@@ -396,14 +396,13 @@
         pc = [UIPopoverController.alloc initWithContentViewController: avc];
 
         pc.popoverContentSize = avc.preferredContentSize;
-
-        [pc presentPopoverFromBarButtonItem: sender
-                   permittedArrowDirections: UIPopoverArrowDirectionAny
-                                   animated: YES];
         avc.completionHandler = ^(NSString *activityType, BOOL completed) {
 
             [pc dismissPopoverAnimated: YES];
         };
+        [pc presentPopoverFromBarButtonItem: sender
+                   permittedArrowDirections: UIPopoverArrowDirectionAny
+                                   animated: YES];
     }
     else {
 
