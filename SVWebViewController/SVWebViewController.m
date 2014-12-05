@@ -262,7 +262,7 @@
     if (url != nil) {
         NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
         
-        if ([[url absoluteString] hasPrefix:@"file:///"]) {
+        if (url.fileURL) {
             UIDocumentInteractionController *dc = [UIDocumentInteractionController interactionControllerWithURL:url];
             [dc presentOptionsMenuFromRect:self.view.bounds inView:self.view animated:YES];
         } else {
