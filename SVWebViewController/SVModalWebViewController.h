@@ -15,5 +15,6 @@
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
+@property (nonatomic, assign, getter=isBarsTranslucent) BOOL barsTranslucent;
 
 @end
