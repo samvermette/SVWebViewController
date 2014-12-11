@@ -56,6 +56,7 @@
     self.webViewController.title = self.title;
     self.navigationBar.tintColor = self.barsTintColor;
     self.navigationBar.translucent = self.barsTranslucent;
+    self.navigationBar.barStyle = self.barsStyle;
 }
 
 @end

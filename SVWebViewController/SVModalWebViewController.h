@@ -16,5 +16,6 @@
 
 @property (nonatomic, strong) UIColor *barsTintColor;
 @property (nonatomic, assign, getter=isBarsTranslucent) BOOL barsTranslucent;
+@property (nonatomic, assign) UIBarStyle barsStyle;
 
 @end
