@@ -144,7 +144,8 @@
 } // -viewWillAppear:
 
 - (void)viewDidAppear:(BOOL)animated {
-
+    [super viewDidAppear: animated];
+    
     id<SVWebViewControllerDelegate> delegate = self.delegate;
 
     if ([delegate respondsToSelector: @selector(webViewControllerDidAppear:)]) {
