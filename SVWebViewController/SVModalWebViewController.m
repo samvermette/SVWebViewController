@@ -54,9 +54,12 @@
     [super viewWillAppear:NO];
     
     self.webViewController.title = self.title;
-    self.navigationBar.tintColor = self.barsTintColor;
     self.navigationBar.translucent = self.barsTranslucent;
     self.navigationBar.barStyle = self.barsStyle;
+}
+
+- (void)setBarsTintColor:(UIColor *)barsTintColor {
+    self.navigationBar.tintColor = barsTintColor;
 }
 
 @end
