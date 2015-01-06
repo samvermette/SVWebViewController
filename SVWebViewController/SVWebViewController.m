@@ -82,7 +82,7 @@
 	[super viewWillAppear:animated];
 	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.navigationController setToolbarHidden:NO animated:animated];
+        [self.navigationController setToolbarHidden:self.toolBarHidden animated:animated];
     }
     else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         [self.navigationController setToolbarHidden:YES animated:animated];

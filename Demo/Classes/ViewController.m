@@ -27,6 +27,7 @@
     webViewController.barsTintColor = [UIColor whiteColor];
     webViewController.barsTranslucent = NO;
     webViewController.barsStyle = UIBarStyleBlack;
+    webViewController.toolBarHidden = YES;
     [self presentViewController:webViewController animated:YES completion:NULL];
 }
 

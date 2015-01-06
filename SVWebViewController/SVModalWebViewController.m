@@ -62,4 +62,9 @@
     self.navigationBar.tintColor = barsTintColor;
 }
 
+- (void)setToolBarHidden:(BOOL)toolBarHidden
+{
+    self.webViewController.toolBarHidden = toolBarHidden;
+}
+
 @end
