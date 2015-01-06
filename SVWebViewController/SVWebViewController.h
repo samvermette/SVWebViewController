@@ -12,4 +12,6 @@
 - (instancetype)initWithURL:(NSURL*)URL;
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 
+@property (nonatomic, assign, getter=toolBarHidden) BOOL toolBarHidden;
+
 @end

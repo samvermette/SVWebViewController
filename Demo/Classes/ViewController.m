@@ -24,6 +24,10 @@
 	NSURL *URL = [NSURL URLWithString:@"http://samvermette.com"];
 	SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] initWithURL:URL];
 	webViewController.modalPresentationStyle = UIModalPresentationPageSheet;
+    webViewController.barsTintColor = [UIColor whiteColor];
+    webViewController.barsTranslucent = NO;
+    webViewController.barsStyle = UIBarStyleBlack;
+    webViewController.toolBarHidden = YES;
     [self presentViewController:webViewController animated:YES completion:NULL];
 }
 
