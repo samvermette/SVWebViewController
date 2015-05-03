@@ -397,10 +397,17 @@
         pc = [UIPopoverController.alloc initWithContentViewController: avc];
 
         pc.popoverContentSize = avc.preferredContentSize;
+#if (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
+        avc.completionWithItemsHandler = ^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+
+            [pc dismissPopoverAnimated: YES];
+        };
+#else
         avc.completionHandler = ^(NSString *activityType, BOOL completed) {
 
             [pc dismissPopoverAnimated: YES];
         };
+#endif
         [pc presentPopoverFromBarButtonItem: sender
                    permittedArrowDirections: UIPopoverArrowDirectionAny
                                    animated: YES];
