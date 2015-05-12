@@ -6,14 +6,14 @@
 //
 //  https://github.com/samvermette/SVWebViewController
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @interface SVModalWebViewController : UINavigationController <UIToolbarDelegate>
 
 - (id)initWithAddress:(NSString*)urlString;
 - (id)initWithURL:(NSURL *)URL;
 
-@property (nonatomic) UIColor *barsTintColor;
+@property (nonatomic) UIColor *barTintColor;
 @property (getter = isBarAttached, nonatomic) BOOL barAttached;
 
 @end

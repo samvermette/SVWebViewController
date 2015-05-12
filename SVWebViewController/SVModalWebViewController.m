@@ -40,12 +40,18 @@
     return self;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void) viewWillAppear: (BOOL) animated {
+
     [super viewWillAppear:NO];
     
     self.webViewController.title = self.title;
-    self.navigationBar.tintColor = self.barsTintColor;
-}
+
+    if (self.barTintColor) {
+
+        self.navigationBar.barTintColor = self.barTintColor;
+    }
+
+} // -viewWillAppear:
 
 
 #pragma mark - UIToolbarDelegate methods.
