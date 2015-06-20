@@ -6,6 +6,8 @@
 //
 //  https://github.com/samvermette/SVWebViewController
 
+@import UIKit;
+
 @protocol SVWebViewControllerDelegate;
 @protocol SVWebViewPresenter <UIWebViewDelegate, SVWebViewControllerDelegate>
 @end
