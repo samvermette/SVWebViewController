@@ -212,6 +212,11 @@
         
         self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        if (self.navigationController.toolbar.translucent) {
+            self.navigationController.toolbar.translucent = self.navigationController.navigationBar.translucent;
+            [self setExtendedLayoutIncludesOpaqueBars:YES];
+        }
+
         self.toolbarItems = items;
     }
 }
@@ -240,6 +245,7 @@
     if ([self.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
         [self.delegate webViewDidFinishLoad:webView];
     }
+    
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -307,5 +313,6 @@
 - (void)doneButtonTapped:(id)sùender {
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
+
 
 @end
