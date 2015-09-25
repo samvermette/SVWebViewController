@@ -20,6 +20,7 @@
 
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURLRequest *request;
+@property (nonatomic, assign) BOOL scalesPageToFit;
 
 @end
 
@@ -35,17 +36,30 @@
 }
 
 - (instancetype)initWithAddress:(NSString *)urlString {
-    return [self initWithURL:[NSURL URLWithString:urlString]];
+    return [self initWithURL:[NSURL URLWithString:urlString] scalesPageToFit:YES];
+}
+
+- (instancetype)initWithAddress:(NSString *)urlString scalesPageToFit:(BOOL)scalesPageToFit {
+    return [self initWithURL:[NSURL URLWithString:urlString] scalesPageToFit:scalesPageToFit];
 }
 
 - (instancetype)initWithURL:(NSURL*)pageURL {
-    return [self initWithURLRequest:[NSURLRequest requestWithURL:pageURL]];
+    return [self initWithURLRequest:[NSURLRequest requestWithURL:pageURL] scalesPageToFit:YES];
+}
+
+- (instancetype)initWithURL:(NSURL*)pageURL scalesPageToFit:(BOOL)scalesPageToFit {
+    return [self initWithURLRequest:[NSURLRequest requestWithURL:pageURL] scalesPageToFit:scalesPageToFit];
 }
 
 - (instancetype)initWithURLRequest:(NSURLRequest*)request {
+    return [self initWithURLRequest:request scalesPageToFit:YES];
+}
+
+- (instancetype)initWithURLRequest:(NSURLRequest*)request scalesPageToFit:(BOOL)scalesPageToFit {
     self = [super init];
     if (self) {
         self.request = request;
+        self.scalesPageToFit = scalesPageToFit;
     }
     return self;
 }
@@ -78,9 +92,9 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     NSAssert(self.navigationController, @"SVWebViewController needs to be contained in a UINavigationController. If you are presenting SVWebViewController modally, use SVModalWebViewController instead.");
-    
+
 	[super viewWillAppear:animated];
-	
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:NO animated:animated];
     }
@@ -91,7 +105,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
@@ -105,7 +119,7 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         return YES;
-    
+
     return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
 }
 
@@ -115,7 +129,7 @@
     if(!_webView) {
         _webView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
         _webView.delegate = self;
-        _webView.scalesPageToFit = YES;
+        _webView.scalesPageToFit = self.scalesPageToFit;
     }
     return _webView;
 }
@@ -168,16 +182,16 @@
 - (void)updateToolbarItems {
     self.backBarButtonItem.enabled = self.self.webView.canGoBack;
     self.forwardBarButtonItem.enabled = self.self.webView.canGoForward;
-    
+
     UIBarButtonItem *refreshStopBarButtonItem = self.self.webView.isLoading ? self.stopBarButtonItem : self.refreshBarButtonItem;
-    
+
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         CGFloat toolbarWidth = 250.0f;
         fixedSpace.width = 35.0f;
-        
+
         NSArray *items = [NSArray arrayWithObjects:
                           fixedSpace,
                           refreshStopBarButtonItem,
@@ -188,14 +202,14 @@
                           fixedSpace,
                           self.actionBarButtonItem,
                           nil];
-        
+
         UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
         toolbar.items = items;
         toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.navigationItem.rightBarButtonItems = items.reverseObjectEnumerator.allObjects;
     }
-    
+
     else {
         NSArray *items = [NSArray arrayWithObjects:
                           fixedSpace,
@@ -208,7 +222,7 @@
                           self.actionBarButtonItem,
                           fixedSpace,
                           nil];
-        
+
         self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
         self.toolbarItems = items;
@@ -225,11 +239,11 @@
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
+
     if (self.navigationItem.title == nil) {
         self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     }
-    
+
     [self updateToolbarItems];
 }
 
@@ -261,13 +275,13 @@
     NSURL *url = self.webView.request.URL ? self.webView.request.URL : self.request.URL;
     if (url != nil) {
         NSArray *activities = @[[SVWebViewControllerActivitySafari new], [SVWebViewControllerActivityChrome new]];
-        
+
         if (url.fileURL) {
             UIDocumentInteractionController *dc = [UIDocumentInteractionController interactionControllerWithURL:url];
             [dc presentOptionsMenuFromRect:self.view.bounds inView:self.view animated:YES];
         } else {
             UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:activities];
-            
+
 #ifdef __IPHONE_8_0
             if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_7_1 &&
                 UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
@@ -277,7 +291,7 @@
                 ctrl.barButtonItem = sender;
             }
 #endif
-            
+
             [self presentViewController:activityController animated:YES completion:nil];
         }
     }
