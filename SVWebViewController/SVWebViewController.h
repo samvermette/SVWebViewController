@@ -15,4 +15,6 @@
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 - (instancetype)initWithURLRequest:(NSURLRequest*)request scalesPageToFit:(BOOL)scalesPageToFit;
 
+@property (nonatomic, weak) id<UIWebViewDelegate> delegate;
+
 @end

@@ -18,5 +18,6 @@
 - (instancetype)initWithURLRequest:(NSURLRequest *)request scalesPageToFit:(BOOL)scalesPageToFit;
 
 @property (nonatomic, strong) UIColor *barsTintColor;
+@property (nonatomic, weak) id<UIWebViewDelegate> webViewDelegate;
 
 @end
