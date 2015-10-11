@@ -312,10 +312,20 @@
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
-	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-	
-	self.navigationItem.title = webView.title;
-	[self updateToolbarItems];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    
+    if (self.navigationItem.title == nil)
+        [webView evaluateJavaScript:@"document.title" completionHandler:^(id result, NSError * _Nullable error) {
+            if (error == nil)
+            {
+                if (result != nil && [[result class] isSubclassOfClass:[NSString class]])
+                {
+                    self.navigationItem.title = result;
+                }
+            }
+        }];
+    
+    [self updateToolbarItems];
 }
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
