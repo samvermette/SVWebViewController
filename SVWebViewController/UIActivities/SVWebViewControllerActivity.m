@@ -8,6 +8,8 @@
 
 #import "SVWebViewControllerActivity.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
 @implementation SVWebViewControllerActivity
 
 - (NSString *)activityType {
@@ -30,3 +32,4 @@
 }
 
 @end
+#pragma clang diagnostic pop
