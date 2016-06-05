@@ -17,7 +17,7 @@ SVWebViewController is a simple inline browser for your iOS 7 app.
 
 ### CocoaPods
 
-I'm not a big fan of CocoaPods, so tend to not keep it updated. If you really want to use SVWebViewController with CocoaPods, I suggest you use `pod 'SVWebViewController', :head` to pull from the `master` branch directly. I'm usually careful about what I push there and is the version I use myself in all my projects.
+I'm not a big fan of CocoaPods, so tend to not keep it updated. If you really want to use SVWebViewController with CocoaPods, I suggest you use `pod 'SVWebViewController', :git => 'https://github.com/TransitApp/SVWebViewController.git` to pull from the `master` branch directly. I'm usually careful about what I push there and is the version I use myself in all my projects.
 
 ### Manually
 
