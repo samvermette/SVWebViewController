@@ -61,6 +61,7 @@
 
 - (void)setWebViewDelegate:(id<UIWebViewDelegate>)webViewDelegate {
     self.webViewController.delegate = webViewDelegate;
+    self.webViewController.webDelegate = webViewDelegate;
 }
 
 - (id<UIWebViewDelegate>)webViewDelegate {

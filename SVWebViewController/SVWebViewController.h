@@ -6,6 +6,11 @@
 //
 //  https://github.com/samvermette/SVWebViewController
 
+@protocol webDismissalDelegate <NSObject>
+@optional
+- (void) webviewDismissed;
+@end
+
 @interface SVWebViewController : UIViewController
 
 - (instancetype)initWithAddress:(NSString*)urlString;
@@ -13,5 +18,6 @@
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 
 @property (nonatomic, weak) id<UIWebViewDelegate> delegate;
+@property (nonatomic, weak) id<webDismissalDelegate> webDelegate;
 
 @end

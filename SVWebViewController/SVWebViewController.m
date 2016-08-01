@@ -306,6 +306,9 @@
 
 - (void)doneButtonTapped:(id)sùender {
     [self dismissViewControllerAnimated:YES completion:NULL];
+
+    if ([self.webDelegate respondsToSelector:@selector(webviewDismissed)])
+        [self.webDelegate webviewDismissed];
 }
 
 @end
