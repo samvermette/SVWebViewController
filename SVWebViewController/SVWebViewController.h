@@ -6,12 +6,16 @@
 //
 //  https://github.com/samvermette/SVWebViewController
 
+@protocol SVWebViewControllerDelegate <UIWebViewDelegate>
+-(void) didPressDoneButton;
+@end
+
 @interface SVWebViewController : UIViewController
 
 - (instancetype)initWithAddress:(NSString*)urlString;
 - (instancetype)initWithURL:(NSURL*)URL;
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 
-@property (nonatomic, weak) id<UIWebViewDelegate> delegate;
+@property (nonatomic, weak) id<SVWebViewControllerDelegate> delegate;
 
 @end
