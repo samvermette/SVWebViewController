@@ -55,6 +55,8 @@
     
     self.webViewController.title = self.title;
     self.navigationBar.tintColor = self.barsTintColor;
+    
+    [self.navigationController.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
 }
 
 #pragma mark - Delegate
