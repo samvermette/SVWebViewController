@@ -9,8 +9,11 @@
 @interface SVWebViewController : UIViewController
 
 - (instancetype)initWithAddress:(NSString*)urlString;
+- (instancetype)initWithAddress:(NSString*)urlString scalesPageToFit:(BOOL)scalesPageToFit;
 - (instancetype)initWithURL:(NSURL*)URL;
+- (instancetype)initWithURL:(NSURL*)URL scalesPageToFit:(BOOL)scalesPageToFit;
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
+- (instancetype)initWithURLRequest:(NSURLRequest*)request scalesPageToFit:(BOOL)scalesPageToFit;
 
 @property (nonatomic, weak) id<UIWebViewDelegate> delegate;
 
