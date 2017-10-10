@@ -304,8 +304,12 @@
     }
 }
 
-- (void)doneButtonTapped:(id)sùender {
-    [self dismissViewControllerAnimated:YES completion:NULL];
+- (void)doneButtonTapped:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:^{
+      if ([self.delegate respondsToSelector:@selector(didPressDoneButton)]) {
+        [self.delegate didPressDoneButton];
+      }
+    }];
 }
 
 @end
