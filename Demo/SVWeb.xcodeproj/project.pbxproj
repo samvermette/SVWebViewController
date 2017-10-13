@@ -28,6 +28,10 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* ViewController.m */; };
 		28F335F11007B36200424DE2 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* ViewController.xib */; };
+		28FBEDBB1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad.png in Resources */ = {isa = PBXBuildFile; fileRef = 28FBEDB61BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad.png */; };
+		28FBEDBC1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28FBEDB71BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad@2x.png */; };
+		28FBEDBD1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.m in Sources */ = {isa = PBXBuildFile; fileRef = 28FBEDB91BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.m */; };
+		28FBEDBE1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28FBEDBA1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox@2x.png */; };
 		D53D8F1316A8688600711E30 /* SVWebViewController.strings in Resources */ = {isa = PBXBuildFile; fileRef = D53D8F1516A8688600711E30 /* SVWebViewController.strings */; };
 		D5FA63C516A8707A0087531C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D5FA63C416A8707A0087531C /* Default-568h@2x.png */; };
 /* End PBXBuildFile section */
@@ -65,6 +69,11 @@
 		28C286DF0D94DF7D0034E888 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		28C286E00D94DF7D0034E888 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		28F335F01007B36200424DE2 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ViewController.xib; path = ../ViewController.xib; sourceTree = "<group>"; };
+		28FBEDB61BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityFirefox-iPad.png"; sourceTree = "<group>"; };
+		28FBEDB71BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityFirefox-iPad@2x.png"; sourceTree = "<group>"; };
+		28FBEDB81BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVWebViewControllerActivityFirefox.h; sourceTree = "<group>"; };
+		28FBEDB91BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVWebViewControllerActivityFirefox.m; sourceTree = "<group>"; };
+		28FBEDBA1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SVWebViewControllerActivityFirefox@2x.png"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		431F485D17145A510045AA32 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/SVWebViewController.strings; sourceTree = "<group>"; };
 		627D469418D9EA4300E514BB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/SVWebViewController.strings; sourceTree = "<group>"; };
@@ -162,10 +171,23 @@
 			children = (
 				22DBB6681831E05D0008887C /* SVWebViewControllerActivity.h */,
 				22DBB6691831E05D0008887C /* SVWebViewControllerActivity.m */,
+				28FBEDB51BFA7DC300BD2A8A /* Firefox */,
 				22AAF0B01831F52F00AB15C4 /* Safari */,
 				22AAF0AA1831F52F00AB15C4 /* Chrome */,
 			);
 			path = UIActivities;
+			sourceTree = "<group>";
+		};
+		28FBEDB51BFA7DC300BD2A8A /* Firefox */ = {
+			isa = PBXGroup;
+			children = (
+				28FBEDB61BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad.png */,
+				28FBEDB71BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad@2x.png */,
+				28FBEDB81BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.h */,
+				28FBEDB91BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.m */,
+				28FBEDBA1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox@2x.png */,
+			);
+			path = Firefox;
 			sourceTree = "<group>";
 		};
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
@@ -287,6 +309,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
+				28FBEDBC1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad@2x.png in Resources */,
 				22AAF0BA1831F52F00AB15C4 /* SVWebViewControllerActivitySafari-iPad.png in Resources */,
 				22AAF0BB1831F52F00AB15C4 /* SVWebViewControllerActivitySafari-iPad@2x.png in Resources */,
 				22AAF0B71831F52F00AB15C4 /* SVWebViewControllerActivityChrome-iPad@2x.png in Resources */,
@@ -297,8 +320,10 @@
 				22AAF0BD1831F52F00AB15C4 /* SVWebViewControllerActivitySafari@2x.png in Resources */,
 				22AAF0BF1831F5B300AB15C4 /* README.md in Resources */,
 				D53D8F1316A8688600711E30 /* SVWebViewController.strings in Resources */,
+				28FBEDBE1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox@2x.png in Resources */,
 				22AAF0B91831F52F00AB15C4 /* SVWebViewControllerActivityChrome@2x.png in Resources */,
 				D5FA63C516A8707A0087531C /* Default-568h@2x.png in Resources */,
+				28FBEDBB1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox-iPad.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +341,7 @@
 				221C80AF13BBDA2F005F0AB8 /* SVWebViewController.m in Sources */,
 				22F087701458794B003ECD31 /* SVModalWebViewController.m in Sources */,
 				22AAF0B81831F52F00AB15C4 /* SVWebViewControllerActivityChrome.m in Sources */,
+				28FBEDBD1BFA7DC300BD2A8A /* SVWebViewControllerActivityFirefox.m in Sources */,
 				22AAF0BC1831F52F00AB15C4 /* SVWebViewControllerActivitySafari.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

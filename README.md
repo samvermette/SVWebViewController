@@ -9,7 +9,7 @@ SVWebViewController is a simple inline browser for your iOS 7 app.
 * iPhone and iPad distinct UIs
 * full landscape orientation support
 * back, forward, stop/refresh and share buttons
-* Open in Safari and Chrome UIActivities
+* Open in Safari, Firefox, and Chrome UIActivities
 * navbar title set to the currently visible web page
 * talks with `setNetworkActivityIndicatorVisible`
 
@@ -44,7 +44,7 @@ SVModalWebViewController *webViewController = [[SVModalWebViewController alloc] 
 
 ### SVWebViewControllerActivity
 
-Starting in iOS 6 Apple uses `UIActivity` to let you show additional sharing methods in share sheets. `SVWebViewController` comes with "Open in Safari" and "Open in Chrome" activities. You can easily add your own activity by subclassing `SVWebViewControllerActivity` which takes care of a few things automatically for you. Have a look at the Safari and Chrome activities for implementation examples. Feel free to send it as a pull request once you're done!
+Starting in iOS 6 Apple uses `UIActivity` to let you show additional sharing methods in share sheets. `SVWebViewController` comes with "Open in Safari", "Open in Firefox", and "Open in Chrome" activities. You can easily add your own activity by subclassing `SVWebViewControllerActivity` which takes care of a few things automatically for you. Have a look at the Safari, Firefox, and Chrome activities for implementation examples. Feel free to send it as a pull request once you're done!
 
 
 ## Credits
