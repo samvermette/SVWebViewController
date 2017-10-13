@@ -65,6 +65,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self updateToolbarItems];
+    
+    self.extendedLayoutIncludesOpaqueBars = YES;
+    self.edgesForExtendedLayout = UIRectEdgeBottom;
+    
+    //[self.tabBarController.tabBar setFrame:CGRectZero];
+    //[self.tabBarController.tabBar setHidden:YES];
+    
 }
 
 - (void)viewDidUnload {
@@ -75,6 +82,7 @@
     _refreshBarButtonItem = nil;
     _stopBarButtonItem = nil;
     _actionBarButtonItem = nil;
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -96,6 +104,7 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
+
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -212,6 +221,11 @@
         
         self.navigationController.toolbar.barStyle = self.navigationController.navigationBar.barStyle;
         self.navigationController.toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+        if (self.navigationController.toolbar.translucent) {
+            self.navigationController.toolbar.translucent = self.navigationController.navigationBar.translucent;
+            //[self setExtendedLayoutIncludesOpaqueBars:YES];
+        }
+
         self.toolbarItems = items;
     }
 }
@@ -240,6 +254,7 @@
     if ([self.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
         [self.delegate webViewDidFinishLoad:webView];
     }
+    
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
@@ -307,5 +322,6 @@
 - (void)doneButtonTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:NULL];
 }
+
 
 @end
