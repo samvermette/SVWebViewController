@@ -46,7 +46,9 @@
     [super viewWillAppear:NO];
     
     self.webViewController.title = self.title;
-    self.navigationBar.tintColor = self.barsTintColor;
+    if (self.barsTintColor) {
+        self.navigationBar.tintColor = self.barsTintColor;
+    }
 }
 
 - (void)configureDoneButton {
