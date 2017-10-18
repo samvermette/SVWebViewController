@@ -16,4 +16,6 @@
 @property (nonatomic, readonly) UIWebView *webView;
 @property (nonatomic, strong) NSMutableArray<UIActivity *> *activities;
 
+- (void)doneButtonClicked:(id)sender;
+
 @end
