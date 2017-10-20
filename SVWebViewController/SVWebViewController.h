@@ -12,6 +12,8 @@
 - (instancetype)initWithURL:(NSURL *)URL;
 - (instancetype)initWithURLRequest:(NSURLRequest *)request;
 
+- (void)reloadWebViewWithURL:(NSURL *)URL;
+
 @property (nonatomic, weak) id<UIWebViewDelegate> delegate;
 @property (nonatomic, readonly) UIWebView *webView;
 @property (nonatomic, strong) NSMutableArray<UIActivity *> *activities;
