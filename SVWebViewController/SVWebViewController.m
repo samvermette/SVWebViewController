@@ -10,7 +10,7 @@
 #import "SVWebViewControllerActivitySafari.h"
 #import "SVWebViewController.h"
 
-@interface SVWebViewController () <UIWebViewDelegate>
+@interface SVWebViewController () <WKNavigationDelegate>
 
 @property (nonatomic, strong) UIBarButtonItem *backBarButtonItem;
 @property (nonatomic, strong) UIBarButtonItem *forwardBarButtonItem;
@@ -18,7 +18,7 @@
 @property (nonatomic, strong) UIBarButtonItem *stopBarButtonItem;
 @property (nonatomic, strong) UIBarButtonItem *actionBarButtonItem;
 
-@property (nonatomic, strong) UIWebView *webView;
+@property (nonatomic, strong) WKWebView *webView;
 @property (nonatomic, strong) NSURLRequest *request;
 
 @end
@@ -31,7 +31,7 @@
 - (void)dealloc {
     [self.webView stopLoading];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    self.webView.delegate = nil;
+    self.webView.navigationDelegate = nil;
     self.delegate = nil;
 }
 
@@ -112,11 +112,10 @@
 
 #pragma mark - Getters
 
-- (UIWebView*)webView {
+- (WKWebView*)webView {
     if(!_webView) {
-        _webView = [[UIWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        _webView.delegate = self;
-        _webView.scalesPageToFit = YES;
+        _webView = [[WKWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        _webView.navigationDelegate = self;
     }
     return _webView;
 }
@@ -216,47 +215,66 @@
     }
 }
 
-#pragma mark - UIWebViewDelegate
+#pragma mark - WKNavigationDelegate
 
-- (void)webViewDidStartLoad:(UIWebView *)webView {
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation
+{
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [self updateToolbarItems];
-    
-    if ([self.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
-        [self.delegate webViewDidStartLoad:webView];
+
+    if ([self.delegate respondsToSelector:@selector(webView:didStartProvisionalNavigation:)]) {
+        [self.delegate webView:webView didStartProvisionalNavigation:navigation];
     }
 }
 
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
+{
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
+
+    __weak SVWebViewController *weakSelf = self;
+    __block void (^finalBlock)(void) = ^{
+        SVWebViewController *strongSelf = weakSelf;
+        if (strongSelf) {
+            [strongSelf updateToolbarItems];
+
+            if ([strongSelf.delegate respondsToSelector:@selector(webView:didFinishNavigation:)]) {
+                [strongSelf.delegate webView:webView didFinishNavigation:navigation];
+            }
+        }
+    };
+
     if (self.navigationItem.title == nil) {
-        self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
-    }
-    
-    [self updateToolbarItems];
-    
-    if ([self.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-        [self.delegate webViewDidFinishLoad:webView];
+        id evalCompletion = ^(id _Nullable result, NSError * _Nullable error) {
+            SVWebViewController *strongSelf = weakSelf;
+            if (strongSelf && !error && result) {
+                strongSelf.navigationItem.title = [NSString stringWithFormat:@"%@", result];
+            }
+            finalBlock();
+        };
+        [webView evaluateJavaScript:@"document.title"
+                  completionHandler:evalCompletion];
+    } else {
+        finalBlock();
     }
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
+{
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [self updateToolbarItems];
-    
-    if ([self.delegate respondsToSelector:@selector(webView:didFailLoadWithError:)]) {
-        [self.delegate webView:webView didFailLoadWithError:error];
+
+    if ([self.delegate respondsToSelector:@selector(webView:didFailNavigation:withError:)]) {
+        [self.delegate webView:webView didFailNavigation:navigation withError:error];
     }
 }
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    if ([self.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
-        return [self.delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
+{
+    if ([self.delegate respondsToSelector:@selector(webView:decidePolicyForNavigationAction:decisionHandler:)]) {
+        [self.delegate webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+    } else {
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-    
-    return YES;
 }
 
 #pragma mark - Target actions
@@ -279,7 +297,7 @@
 }
 
 - (void)actionButtonTapped:(id)sender {
-    NSURL *url = self.webView.request.URL ? self.webView.request.URL : self.request.URL;
+    NSURL *url = self.webView.URL ? self.webView.URL : self.request.URL;
     if (url != nil) {
         if ([[url absoluteString] hasPrefix:@"file:///"]) {
             UIDocumentInteractionController *dc = [UIDocumentInteractionController interactionControllerWithURL:url];
