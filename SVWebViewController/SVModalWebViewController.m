@@ -83,11 +83,11 @@
 
 #pragma mark - Delegate
 
-- (void)setWebViewDelegate:(id<UIWebViewDelegate>)webViewDelegate {
+- (void)setWebViewDelegate:(id<WKNavigationDelegate>)webViewDelegate {
     self.webViewController.delegate = webViewDelegate;
 }
 
-- (id<UIWebViewDelegate>)webViewDelegate {
+- (id<WKNavigationDelegate>)webViewDelegate {
     return self.webViewController.delegate;
 }
 
